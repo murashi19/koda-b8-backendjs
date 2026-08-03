@@ -5,29 +5,56 @@ export default class UserModel {
     const { rows } = await db.query(`SELECT * FROM users WHERE email = $1`, [
       email,
     ]);
+
     return rows[0];
   }
 
   static async create(data) {
     const client = await db.connect();
+
     try {
       await client.query("BEGIN");
 
-      const userResult = await client.query(
-        `INSERT INTO users (email, password, role) VALUES ($1,$2,$3) RETURNING id`,
+      // Insert ke tabel users
+      const { rows: userRows } = await client.query(
+        `
+        INSERT INTO users (email, password, role)
+        VALUES ($1, $2, $3)
+        RETURNING id
+        `,
         [data.email, data.password, data.role],
       );
 
-      const user = userResult.rows[0];
+      const userId = userRows[0].id;
 
+      // Insert ke tabel user_profiles
       await client.query(
-        `INSERT INTO user_profiles (user_id, full_name) VALUES ($1, $2)`,
-        [user.id, data.full_name],
+        `
+        INSERT INTO user_profiles (user_id, full_name)
+        VALUES ($1, $2)
+        `,
+        [userId, data.full_name],
+      );
+
+      // Ambil data lengkap dari kedua tabel
+      const { rows } = await client.query(
+        `
+        SELECT
+          u.id,
+          u.email,
+          u.role,
+          p.full_name
+        FROM users u
+        JOIN user_profiles p
+          ON p.user_id = u.id
+        WHERE u.id = $1
+        `,
+        [userId],
       );
 
       await client.query("COMMIT");
 
-      return user;
+      return rows[0];
     } catch (err) {
       await client.query("ROLLBACK");
       throw err;

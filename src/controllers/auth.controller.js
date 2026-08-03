@@ -1,4 +1,4 @@
-import UserModel from "../models/user.models";
+import UserModel from "../models/user.models.js";
 import { constants } from "node:http2";
 import bcrypt from "bcrypt";
 
@@ -28,14 +28,13 @@ export async function register(req, res) {
       email,
       password: hashedPassword,
       full_name,
+      role: "CUSTOMER",
     });
-
-    const { password: _password, ...userWithoutPassword } = newUser;
 
     return res.status(constants.HTTP_STATUS_CREATED).json({
       success: true,
       message: "Registered successfully",
-      data: userWithoutPassword,
+      data: newUser,
     });
   } catch (err) {
     console.error(err);
