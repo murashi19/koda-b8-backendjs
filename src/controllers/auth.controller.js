@@ -45,3 +45,45 @@ export async function register(req, res) {
     });
   }
 }
+
+export async function login(req, res) {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+      success: false,
+      message: "Email or Password required",
+    });
+  }
+
+  const user = await UserModel.findByEmail(email);
+  if (!user) {
+    return res.status(constants.HTTP_STATUS_UNAUTHORIZED).json({
+      success: false,
+      message: "Invalid email or password",
+    });
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    return res.status(constants.HTTP_STATUS_UNAUTHORIZED).json({
+      success: false,
+      message: "Incorrect password",
+    });
+  }
+
+  // TODO TOKEN
+
+  const userId = await UserModel.findByIdUser(user.id);
+  console.log(userId);
+  res.json({
+    success: true,
+    message: "Login Successfully",
+    // token: token,
+    result: {
+      id: user.id,
+      email: user.email,
+      full_name: userId.full_name,
+    },
+  });
+}

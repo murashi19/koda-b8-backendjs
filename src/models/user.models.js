@@ -8,6 +8,24 @@ export default class UserModel {
 
     return rows[0];
   }
+  static async findByIdUser(userId) {
+    const { rows } = await db.query(
+      `
+    SELECT
+      u.id,
+      u.email,
+      u.role,
+      p.full_name
+    FROM users u
+    JOIN user_profiles p
+      ON p.user_id = u.id
+    WHERE u.id = $1
+    `,
+      [userId],
+    );
+
+    return rows[0];
+  }
 
   static async create(data) {
     const client = await db.connect();
