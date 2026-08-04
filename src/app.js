@@ -1,7 +1,8 @@
 import express from "express";
 
 import authRoute from "./routes/authRoute.js";
-import UserProfileRoute from "./routes/userProfileRoute.js";
+import userProfileRoute from "./routes/userProfileRoute.js";
+import productRoute from "./routes/productRoute.js";
 import corsMiddleware from "./middleware/cors.js";
 
 const app = express();
@@ -13,7 +14,8 @@ app.use(corsMiddleware);
 app.use("/uploads", express.static("public/uploads"));
 
 app.use("/auth", authRoute);
-app.use("/profile", UserProfileRoute);
+app.use("/profiles", userProfileRoute);
+app.use("/products", productRoute);
 
 app.use((err, req, res, next) => {
   if (err) {
