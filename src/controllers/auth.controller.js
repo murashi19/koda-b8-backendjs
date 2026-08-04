@@ -1,6 +1,7 @@
 import UserModel from "../models/user.models.js";
 import { constants } from "node:http2";
 import bcrypt from "bcrypt";
+import { signToken } from "../lib/jwt.js";
 
 export async function register(req, res) {
   try {
@@ -73,13 +74,14 @@ export async function login(req, res) {
   }
 
   // TODO TOKEN
+  const token = signToken(user);
 
   const userId = await UserModel.findByIdUser(user.id);
   console.log(userId);
   res.json({
     success: true,
     message: "Login Successfully",
-    // token: token,
+    token: token,
     result: {
       id: user.id,
       email: user.email,
