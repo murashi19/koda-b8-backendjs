@@ -1,4 +1,6 @@
 import express from "express";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUI from "swagger-ui-express";
 
 import authRoute from "./routes/authRoute.js";
 import userProfileRoute from "./routes/userProfileRoute.js";
@@ -11,9 +13,43 @@ import corsMiddleware from "./middleware/cors.js";
 
 const app = express();
 
+const options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Swagger Backend BeliMudah - Open API 3.0",
+      version: "1.0.0",
+      description: "API documentation with backend application web BeliMudah",
+    },
+    servers: [
+      {
+        url: `http://localhost:${process.env.PORT || 8081}`,
+        description: "Server Local",
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [{ bearerAuth: [] }],
+  },
+  apis: ["./src/routes/*.js"],
+};
+const openapi = swaggerJSDoc(options);
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(corsMiddleware);
+
+app.use("/docs", swaggerUI.serve, swaggerUI.setup(openapi));
+app.get("/api-docs.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
 
 app.use("/uploads", express.static("public/uploads"));
 
