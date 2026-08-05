@@ -52,7 +52,7 @@ CREATE TABLE products(
     review_count INT DEFAULT 0,
     stock INT DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- PRODUCT DETAILS
@@ -62,7 +62,7 @@ CREATE TABLE product_details (
     description TEXT,
     specifications TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- PRODUCT IMAGE
@@ -94,7 +94,7 @@ CREATE TABLE wishlists (
     product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    UNIQUE KEY unique_wishlist (user_id, product_id)
+    UNIQUE (user_id, product_id)
 );
 
 INSERT INTO categories (name) VALUES
@@ -150,8 +150,6 @@ CREATE TABLE cart_items (
     UNIQUE(user_id, product_id)
 );
 
-ALTER TABLE cart_items ADD COLUMN is_selected BOOLEAN DEFAULT TRUE;
-
 CREATE TYPE order_status AS ENUM (
     'PENDING',
     'PAID',
@@ -171,7 +169,7 @@ CREATE TABLE orders(
     shipping_cost DECIMAL(14,2) NOT NULL DEFAULT 0,
     subtotal DECIMAL(14,2) NOT NULL,
     total DECIMAL(14,2) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    status order_status DEFAULT 'PENDING',
 
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
