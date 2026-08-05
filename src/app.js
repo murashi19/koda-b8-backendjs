@@ -3,6 +3,10 @@ import express from "express";
 import authRoute from "./routes/authRoute.js";
 import userProfileRoute from "./routes/userProfileRoute.js";
 import productRoute from "./routes/productRoute.js";
+import wishlistRoute from "./routes/wishlistRoute.js";
+import addressRoute from "./routes/addressRoute.js";
+import orderRoute from "./routes/orderRoute.js";
+import cartRoute from "./routes/cartRoute.js";
 import corsMiddleware from "./middleware/cors.js";
 
 const app = express();
@@ -16,6 +20,10 @@ app.use("/uploads", express.static("public/uploads"));
 app.use("/auth", authRoute);
 app.use("/profiles", userProfileRoute);
 app.use("/products", productRoute);
+app.use("/wishlist", wishlistRoute);
+app.use("/addresses", addressRoute);
+app.use("/orders", orderRoute);
+app.use("/carts", cartRoute);
 
 app.use((err, req, res, next) => {
   if (err) {

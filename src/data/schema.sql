@@ -76,3 +76,83 @@ INSERT INTO tags (name) VALUES
   ('Diskon'),
   ('Promo'),
   ('Flash Deal');
+
+
+CREATE TABLE addresses (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_profile_id BIGINT NOT NULL REFERENCES user_profiles(user_id) ON DELETE CASCADE,
+    label VARCHAR(50) NOT NULL,
+    province VARCHAR(100) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    district VARCHAR(100),
+    subdistrict VARCHAR(100),
+    postal_code VARCHAR(10),
+    address TEXT NOT NULL,
+    note TEXT,
+    is_default BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE carts (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id BIGINT NOT NULL UNIQUE
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE cart_items (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    quantity INT NOT NULL DEFAULT 1 CHECK(quantity > 0),
+    is_selected BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, product_id)
+);
+
+ALTER TABLE cart_items ADD COLUMN is_selected BOOLEAN DEFAULT TRUE;
+
+CREATE TYPE order_status AS ENUM (
+    'PENDING',
+    'PAID',
+    'PROCESSING',
+    'SHIPPED',
+    'DELIVERED',
+    'CANCELLED'
+);
+
+CREATE TABLE orders(
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    order_code VARCHAR(50) UNIQUE NOT NULL,
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    address_id BIGINT REFERENCES addresses(id) ON DELETE SET NULL,
+    shipping_method VARCHAR(30) NOT NULL,
+    payment_method VARCHAR(30) NOT NULL,
+    shipping_cost DECIMAL(14,2) NOT NULL DEFAULT 0,
+    subtotal DECIMAL(14,2) NOT NULL,
+    total DECIMAL(14,2) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- DROP TABLE IF EXISTS orders CASCADE;
+-- DROP TABLE IF EXISTS order_items CASCADE;
+
+CREATE TABLE order_items (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    order_id BIGINT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    product_id BIGINT REFERENCES products(id) ON DELETE SET NULL,
+
+    product_name VARCHAR(255) NOT NULL,
+    product_image VARCHAR(500),
+    price DECIMAL(12,2) NOT NULL,
+    qty INT NOT NULL,
+    subtotal DECIMAL(14,2) NOT NULL
+);
