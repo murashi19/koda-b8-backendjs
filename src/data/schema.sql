@@ -1,3 +1,38 @@
+CREATE TYPE user_role AS ENUM (
+    'CUSTOMER',
+    'ADMIN'
+);
+
+CREATE TABLE users (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    role user_role NOT NULL DEFAULT 'CUSTOMER',
+    is_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE user_profiles (
+    user_id BIGINT PRIMARY KEY
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+    full_name VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(20),
+    avatar VARCHAR(500),
+    gender VARCHAR(20),
+    birth_date DATE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_users_email
+ON users(email);
+
+CREATE INDEX idx_users_role
+ON users(role);
+
 -- CATEGORY
 CREATE TABLE categories(
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
