@@ -123,3 +123,18 @@ export async function UpdateProduct(req, res) {
     });
   }
 }
+
+export async function deleteProduct(req, res) {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+      success: false,
+      message: "Product not found",
+    });
+  }
+  const destroy = await ProductModel.DeleteProduct(id);
+  res.json({
+    success: true,
+    message: "Deleted product successfully",
+  });
+}
