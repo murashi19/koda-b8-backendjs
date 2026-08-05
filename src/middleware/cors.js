@@ -5,6 +5,8 @@ import { constants } from "node:http2";
  * @param {import("express").Response} res
  * @param {function()} next
  */
+
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 function corsMiddleware(req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
   res.setHeader(
