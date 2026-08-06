@@ -1,6 +1,10 @@
 import db from "../lib/db.js";
 
 export default class UserModel {
+  static async GetAllUser() {
+    const { rows } = await db.query(`SELECT * FROM users ORDER BY id ASC`);
+    return rows;
+  }
   static async findByEmail(email) {
     const { rows } = await db.query(`SELECT * FROM users WHERE email = $1`, [
       email,

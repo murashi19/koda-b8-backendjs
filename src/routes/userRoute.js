@@ -1,9 +1,48 @@
 import express from "express";
-import { Destroy } from "../controllers/user.controller.js";
+import { GetAllUser, Destroy } from "../controllers/user.controller.js";
 import authMiddleware from "../middleware/auth.js";
 
 const router = express.Router();
 
+/**
+ * @openapi
+ * /users:
+ *  get:
+ *    summary: Get All Users
+ *    tags: [Users]
+ *    responses:
+ *      200:
+ *        description: All Users List
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                type: object
+ *                properties:
+ *                  id:
+ *                    type: integer
+ *                    example: 1
+ *                  email:
+ *                    type: string
+ *                    example: "admin@gmail.com"
+ *                  password:
+ *                    type: string
+ *                    example: "$1wasdddakhcz1392"
+ *                  role:
+ *                    type: string
+ *                    example: "CUSTOMER"
+ *                  is_verified:
+ *                    type: boolean
+ *                    example: true
+ *                  is_active:
+ *                    type: boolean
+ *                    example: true
+ *
+ *      500:
+ *        description: Failed to fetch Users
+ */
+router.get("/", GetAllUser);
 /**
  * @openapi
  * /users/{id}:
