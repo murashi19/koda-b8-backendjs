@@ -41,3 +41,5 @@ const router = express.Router();
  *        description: Internal server error
  */
 router.delete("/:id", authMiddleware, Destroy);
+
+export default router;
