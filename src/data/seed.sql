@@ -82,7 +82,7 @@ VALUES
 ('Converse', 'Converse Chuck Taylor All Star', 'https://images.unsplash.com/photo-1552346154-21d32810aba3', 1, 899000, 699000, 4.8, 402, 32),
 ('Logitech', 'Logitech MX Master 3S', 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46', 2, 1499000, NULL, 4.9, 289, 18),
 ('Avoskin', 'Avoskin Miraculous Retinol Serum', 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be', 3, 159000, 129000, 4.6, 187, 70),
-('Lock&Lock', 'Lock&Lock Food Container Set', 'https://images.unsplash.com/photo-1584990347449-a2d4c2d0e3a4', 4, 275000, NULL, 4.4, 88, 55);
+('Lock&Lock', 'Lock&Lock Food Container Set', 'https://images.unsplash.com/photo-1584990347449-a2d4c2d0e3a4', 4, 275000, NULL, 4.4, 88, 55)
 -- ===========================
 -- PRODUCT DETAILS
 -- ===========================
@@ -119,7 +119,7 @@ VALUES
 (28, 'Sepatu sneakers klasik ikonik.', 'Ukuran:36-44 | Warna:Hitam Putih'),
 (29, 'Mouse wireless premium untuk produktivitas.', 'Bluetooth & USB Receiver'),
 (30, 'Serum retinol untuk anti-aging.', '20ml'),
-(31, 'Set wadah makanan kedap udara.', '5 pcs | BPA-free');
+(31, 'Set wadah makanan kedap udara.', '5 pcs | BPA-free')
 -- ===========================
 -- PRODUCT IMAGES
 -- ===========================
@@ -157,7 +157,7 @@ VALUES
 (28, 'https://images.unsplash.com/photo-1552346154-21d32810aba3', 1),
 (29, 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46', 1),
 (30, 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be', 1),
-(31, 'https://images.unsplash.com/photo-1584990347449-a2d4c2d0e3a4', 1);
+(31, 'https://images.unsplash.com/photo-1584990347449-a2d4c2d0e3a4', 1)
  
 -- ===========================
 -- PRODUCT TAGS
@@ -197,7 +197,7 @@ VALUES
 (28, 3), (28, 4),        -- Converse Chuck Taylor: best, star-seller
 (29, 1),                 -- Logitech MX Master 3S: new (no discount)
 (30, 2),                 -- Avoskin Retinol: flash
-(31, 5);                 -- Lock&Lock: free-shipping (no discount)
+(31, 5)              -- Lock&Lock: free-shipping (no discount)
 -- ===========================
 -- ADDRESS
 -- ===========================

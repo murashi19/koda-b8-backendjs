@@ -84,6 +84,23 @@ export default class UserModel {
       client.release();
     }
   }
+
+  static async Update(id, data) {
+    const { email, password, role, isVerified } = data;
+    const { rows } = await db.query(
+      `UPDATE users SET 
+      email = COALESCE ($1, email),
+      password = COALESCE ($2, password),
+      role = COALESCE ($3, role),
+      is_verified = COALESCE ($4, is_verified),
+      updated_at = now()
+      WHERE id = $5
+      RETURNING *
+      `,
+      [email, password, role, isVerified, id],
+    );
+    return rows[0];
+  }
   static async Delete(id) {
     const { rows } = await db.query(
       `DELETE FROM users WHERE id = $1 RETURNING *`,

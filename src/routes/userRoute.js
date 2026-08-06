@@ -1,8 +1,13 @@
 import express from "express";
-import { GetAllUser, Destroy } from "../controllers/user.controller.js";
+import {
+  GetAllUser,
+  Destroy,
+  UpdateUser,
+} from "../controllers/user.controller.js";
 import authMiddleware from "../middleware/auth.js";
 
 const router = express.Router();
+router.use(authMiddleware);
 
 /**
  * @openapi
@@ -43,6 +48,9 @@ const router = express.Router();
  *        description: Failed to fetch Users
  */
 router.get("/", GetAllUser);
+
+router.patch("/:id", UpdateUser);
+
 /**
  * @openapi
  * /users/{id}:
@@ -79,6 +87,6 @@ router.get("/", GetAllUser);
  *      500:
  *        description: Internal server error
  */
-router.delete("/:id", authMiddleware, Destroy);
+router.delete("/:id", Destroy);
 
 export default router;
