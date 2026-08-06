@@ -8,7 +8,7 @@ import { constants } from "node:http2";
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 function corsMiddleware(req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  res.setHeader("Access-Control-Allow-Origin", FRONTEND_URL);
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, PATCH, DELETE",
