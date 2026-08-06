@@ -1,6 +1,25 @@
 import WishlistModel from "../models/wishlist.models.js";
 import { constants } from "node:http2";
 
+export async function GetWishlist(req, res) {
+  try {
+    const user_id = req.user.id;
+
+    const wishlist = await WishlistModel.GetWishlist(user_id);
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "Wishlist retrieved successfully",
+      data: wishlist,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Failed to retrieve wishlist",
+    });
+  }
+}
 export async function CreateWishlist(req, res) {
   try {
     const user_id = req.user.id;

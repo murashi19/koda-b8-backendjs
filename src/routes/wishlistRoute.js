@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  GetWishlist,
   CreateWishlist,
   DeleteWishlist,
 } from "../controllers/wishlist.controller.js";
@@ -8,6 +9,72 @@ import authMiddleware from "../middleware/auth.js";
 const router = express.Router();
 router.use(authMiddleware);
 
+/**
+ * @openapi
+ * /wishlist:
+ *  get:
+ *    summary: Get User Wishlist
+ *    tags: [Wishlist]
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: Wishlist retrieved successfully
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                success:
+ *                  type: boolean
+ *                  example: true
+ *                message:
+ *                  type: string
+ *                  example: "Wishlist retrieved successfully"
+ *                data:
+ *                  type: array
+ *                  items:
+ *                    type: object
+ *                    properties:
+ *                      id:
+ *                        type: integer
+ *                        example: 5
+ *                      brand:
+ *                        type: string
+ *                        example: "Nike"
+ *                      name:
+ *                        type: string
+ *                        example: "Nike Air Max 270"
+ *                      image:
+ *                        type: string
+ *                        example: "https://images.unsplash.com/..."
+ *                      category_name:
+ *                        type: string
+ *                        example: "Fashion"
+ *                      regular_price:
+ *                        type: string
+ *                        example: "2500000"
+ *                      discount_price:
+ *                        type: string
+ *                        example: "2100000"
+ *                      rating:
+ *                        type: string
+ *                        example: "4.8"
+ *                      review_count:
+ *                        type: integer
+ *                        example: 312
+ *                      stock:
+ *                        type: integer
+ *                        example: 30
+ *                      wishlisted_at:
+ *                        type: string
+ *                        format: date-time
+ *      401:
+ *        description: Unauthorized, token missing or invalid
+ *      500:
+ *        description: Failed to retrieve wishlist
+ */
+router.get("/", GetWishlist);
 /**
  * @openapi
  * /wishlist:
