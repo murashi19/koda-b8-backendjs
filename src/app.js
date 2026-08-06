@@ -24,7 +24,7 @@ const options = {
     },
     servers: [
       {
-        url: `${BACKEND_URL}`,
+        url: BACKEND_URL,
         description: "Server Local",
       },
     ],
