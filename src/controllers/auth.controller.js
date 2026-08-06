@@ -5,7 +5,7 @@ import { signToken } from "../lib/jwt.js";
 
 export async function register(req, res) {
   try {
-    const { email, password, full_name } = req.body;
+    const { email, password, full_name, role } = req.body;
 
     if (!email || !password || !full_name) {
       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
@@ -29,7 +29,7 @@ export async function register(req, res) {
       email,
       password: hashedPassword,
       full_name,
-      role: "CUSTOMER",
+      role: role || "CUSTOMER",
     });
 
     return res.status(constants.HTTP_STATUS_CREATED).json({
@@ -86,6 +86,7 @@ export async function login(req, res) {
       id: user.id,
       email: user.email,
       full_name: userId.full_name,
+      role: userId.role,
     },
   });
 }

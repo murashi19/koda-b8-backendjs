@@ -14,14 +14,14 @@ INSERT INTO users (
 VALUES
 (
     'admin@belimudah.com',
-    '$2b$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    '$2a$10$gIUEeph16qrrvVkPqpngeecklFH5PgI.IPKhPy1AHKmiBHWFNswi.',
     'ADMIN',
     TRUE,
     TRUE
 ),
 (
     'rafli@gmail.com',
-    '$2b$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    '$2a$10$584FDA1XBgSugyeBP1n3z.F7H3XhPCUrvMK7fgDI/UOl1zq0W4iii',
     'CUSTOMER',
     TRUE,
     TRUE
@@ -45,7 +45,7 @@ VALUES
     'Administrator',
     '081111111111',
     'https://i.pravatar.cc/300?img=1',
-    'Male',
+    'MALE',
     '2000-01-01'
 ),
 (
@@ -53,7 +53,7 @@ VALUES
     'Muhamad Rafli',
     '082222222222',
     'https://i.pravatar.cc/300?img=2',
-    'Male',
+    'MALE',
     '2003-06-10'
 );
 
