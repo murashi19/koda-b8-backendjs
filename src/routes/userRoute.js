@@ -1,5 +1,5 @@
 import express from "express";
-import { Destroy } from "../controllers/user.controller";
+import { Destroy } from "../controllers/user.controller.js";
 import authMiddleware from "../middleware/auth.js";
 
 const router = express.Router();
