@@ -67,7 +67,22 @@ VALUES
 ('Decathlon', 'Decathlon Yoga Mat Pro', 'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f', 5, 250000, 199000, 4.6, 130, 90),
 ('Wilson', 'Wilson Basketball Evolution', 'https://images.unsplash.com/photo-1519861531473-9200262188bf', 5, 550000, 469000, 4.7, 87, 45),
 ('Gramedia', 'Atomic Habits - James Clear', 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c', 6, 129000, 99000, 4.9, 890, 200);
-
+('Zara', 'Zara Oversized Hoodie', 'https://images.unsplash.com/photo-1556821840-3a63f95609a7', 1, 599000, 449000, 4.5, 120, 40),
+('Xiaomi', 'Xiaomi Redmi Note 13', 'https://images.unsplash.com/photo-1598327105666-5b89351aff97', 2, 3299000, 2899000, 4.7, 512, 35),
+('Emina', 'Emina Bright Stuff Face Wash', 'https://images.unsplash.com/photo-1556228720-195a672e8a03', 3, 35000, NULL, 4.4, 64, 200),
+('Cosmos', 'Cosmos Blender 2L', 'https://images.unsplash.com/photo-1570222094114-d054a817e56b', 4, 320000, NULL, 4.3, 45, 30),
+('Adidas', 'Adidas Football Predator', 'https://images.unsplash.com/photo-1614632537190-23e4146777db', 5, 850000, 599000, 4.6, 98, 22),
+('Faber-Castell', 'Faber-Castell Pencil Case Set', 'https://images.unsplash.com/photo-1587145820266-a5951ee6f620', 6, 75000, NULL, 4.5, 30, 150),
+('H&M', 'H&M Basic Tee', 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab', 1, 199000, NULL, 4.2, 76, 90),
+('JBL', 'JBL Flip 6 Speaker', 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1', 2, 1699000, 1399000, 4.8, 245, 28),
+('The Ordinary', 'The Ordinary Niacinamide 10%', 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be', 3, 145000, 119000, 4.7, 310, 80),
+('Electrolux', 'Electrolux Rice Cooker 1.8L', 'https://images.unsplash.com/photo-1585515320310-259814833e62', 4, 899000, 749000, 4.6, 156, 25),
+('Nike', 'Nike Dri-FIT Training Shirt', 'https://images.unsplash.com/photo-1556906781-9a412961c28c', 5, 449000, NULL, 4.5, 52, 60),
+('Standard', 'Standard Notebook Set A5', 'https://images.unsplash.com/photo-1531346878377-a5be20888e57', 6, 45000, NULL, 4.3, 40, 250),
+('Converse', 'Converse Chuck Taylor All Star', 'https://images.unsplash.com/photo-1552346154-21d32810aba3', 1, 899000, 699000, 4.8, 402, 32),
+('Logitech', 'Logitech MX Master 3S', 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46', 2, 1499000, NULL, 4.9, 289, 18),
+('Avoskin', 'Avoskin Miraculous Retinol Serum', 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be', 3, 159000, 129000, 4.6, 187, 70),
+('Lock&Lock', 'Lock&Lock Food Container Set', 'https://images.unsplash.com/photo-1584990347449-a2d4c2d0e3a4', 4, 275000, NULL, 4.4, 88, 55);
 -- ===========================
 -- PRODUCT DETAILS
 -- ===========================
@@ -89,7 +104,22 @@ VALUES
 (13, 'Matras yoga anti-slip.', '183x61cm | Tebal 6mm'),
 (14, 'Bola basket ukuran resmi.', 'Size 7 | Kulit sintetis'),
 (15, 'Buku pengembangan diri terlaris.', '320 halaman | Bahasa Indonesia');
-
+(16, 'Hoodie oversized bahan tebal, nyaman untuk sehari-hari.', 'Ukuran:S-XXL | Warna:Abu-abu'),
+(17, 'Smartphone entry-mid dengan performa cepat.', '256GB | Warna:Hitam'),
+(18, 'Face wash untuk kulit cerah dan bersih.', '100ml'),
+(19, 'Blender serbaguna untuk kebutuhan dapur.', '2 Liter | 400W'),
+(20, 'Sepatu bola dengan grip maksimal.', 'Ukuran:39-44 | Warna:Merah'),
+(21, 'Set tempat pensil lengkap dengan alat tulis.', '12 pcs | Berbagai warna'),
+(22, 'Kaos basic bahan katun combed.', 'Ukuran:S-XL | Warna:Putih'),
+(23, 'Speaker portable tahan air.', 'IP67 | 12 jam baterai'),
+(24, 'Serum niacinamide untuk mencerahkan kulit.', '30ml'),
+(25, 'Rice cooker kapasitas keluarga kecil.', '1.8L | 400W'),
+(26, 'Kaos olahraga dengan teknologi menyerap keringat.', 'Ukuran:S-XL | Warna:Biru'),
+(27, 'Set buku catatan ukuran A5.', '3 pcs | 100 halaman/buku'),
+(28, 'Sepatu sneakers klasik ikonik.', 'Ukuran:36-44 | Warna:Hitam Putih'),
+(29, 'Mouse wireless premium untuk produktivitas.', 'Bluetooth & USB Receiver'),
+(30, 'Serum retinol untuk anti-aging.', '20ml'),
+(31, 'Set wadah makanan kedap udara.', '5 pcs | BPA-free');
 -- ===========================
 -- PRODUCT IMAGES
 -- ===========================
@@ -112,7 +142,23 @@ VALUES
 (13, 'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f', 1),
 (14, 'https://images.unsplash.com/photo-1519861531473-9200262188bf', 1),
 (15, 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c', 1);
-
+(16, 'https://images.unsplash.com/photo-1556821840-3a63f95609a7', 1),
+(17, 'https://images.unsplash.com/photo-1598327105666-5b89351aff97', 1),
+(18, 'https://images.unsplash.com/photo-1556228720-195a672e8a03', 1),
+(19, 'https://images.unsplash.com/photo-1570222094114-d054a817e56b', 1),
+(20, 'https://images.unsplash.com/photo-1614632537190-23e4146777db', 1),
+(21, 'https://images.unsplash.com/photo-1587145820266-a5951ee6f620', 1),
+(22, 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab', 1),
+(23, 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1', 1),
+(24, 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be', 1),
+(25, 'https://images.unsplash.com/photo-1585515320310-259814833e62', 1),
+(26, 'https://images.unsplash.com/photo-1556906781-9a412961c28c', 1),
+(27, 'https://images.unsplash.com/photo-1531346878377-a5be20888e57', 1),
+(28, 'https://images.unsplash.com/photo-1552346154-21d32810aba3', 1),
+(29, 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46', 1),
+(30, 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be', 1),
+(31, 'https://images.unsplash.com/photo-1584990347449-a2d4c2d0e3a4', 1);
+ 
 -- ===========================
 -- PRODUCT TAGS
 -- tag_id: 1=new, 2=flash, 3=best, 4=star-seller, 5=free-shipping
@@ -136,7 +182,22 @@ VALUES
 (13, 4), (13, 5),        -- Decathlon Yoga Mat: star-seller, free-shipping
 (14, 2),                 -- Wilson Basketball: flash
 (15, 3), (15, 4);        -- Atomic Habits: best, star-seller
-
+(16, 1),                 -- Zara Hoodie: new
+(17, 2), (17, 3),        -- Xiaomi Redmi Note 13: flash, best
+(18, 1),                 -- Emina Face Wash: new (no discount)
+(19, 5),                 -- Cosmos Blender: free-shipping (no discount)
+(20, 2),                 -- Adidas Football: flash
+(21, 1),                 -- Faber-Castell: new
+(22, 5),                 -- H&M Basic Tee: free-shipping (no discount)
+(23, 3), (23, 4),        -- JBL Flip 6: best, star-seller
+(24, 2), (24, 1),        -- The Ordinary Niacinamide: flash, new
+(25, 3),                 -- Electrolux Rice Cooker: best
+(26, 1),                 -- Nike Dri-FIT: new (no discount)
+(27, 5),                 -- Standard Notebook: free-shipping (no discount)
+(28, 3), (28, 4),        -- Converse Chuck Taylor: best, star-seller
+(29, 1),                 -- Logitech MX Master 3S: new (no discount)
+(30, 2),                 -- Avoskin Retinol: flash
+(31, 5);                 -- Lock&Lock: free-shipping (no discount)
 -- ===========================
 -- ADDRESS
 -- ===========================
