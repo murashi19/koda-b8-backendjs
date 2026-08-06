@@ -13,6 +13,7 @@ import corsMiddleware from "./middleware/cors.js";
 
 const app = express();
 
+const BACKEND_URL = process.env.BACKEND_URL;
 const options = {
   definition: {
     openapi: "3.0.0",
@@ -23,7 +24,7 @@ const options = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 8081}`,
+        url: `${BACKEND_URL}`,
         description: "Server Local",
       },
     ],
