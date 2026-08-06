@@ -66,7 +66,7 @@ VALUES
 ('IKEA', 'IKEA Storage Organizer Set', 'https://images.unsplash.com/photo-1558997519-83ea9252edf8', 4, 350000, 299000, 4.4, 58, 75),
 ('Decathlon', 'Decathlon Yoga Mat Pro', 'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f', 5, 250000, 199000, 4.6, 130, 90),
 ('Wilson', 'Wilson Basketball Evolution', 'https://images.unsplash.com/photo-1519861531473-9200262188bf', 5, 550000, 469000, 4.7, 87, 45),
-('Gramedia', 'Atomic Habits - James Clear', 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c', 6, 129000, 99000, 4.9, 890, 200);
+('Gramedia', 'Atomic Habits - James Clear', 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c', 6, 129000, 99000, 4.9, 890, 200),
 ('Zara', 'Zara Oversized Hoodie', 'https://images.unsplash.com/photo-1556821840-3a63f95609a7', 1, 599000, 449000, 4.5, 120, 40),
 ('Xiaomi', 'Xiaomi Redmi Note 13', 'https://images.unsplash.com/photo-1598327105666-5b89351aff97', 2, 3299000, 2899000, 4.7, 512, 35),
 ('Emina', 'Emina Bright Stuff Face Wash', 'https://images.unsplash.com/photo-1556228720-195a672e8a03', 3, 35000, NULL, 4.4, 64, 200),
@@ -103,7 +103,7 @@ VALUES
 (12, 'Set organizer penyimpanan rumah.', '5 pcs | Plastik BPA-free'),
 (13, 'Matras yoga anti-slip.', '183x61cm | Tebal 6mm'),
 (14, 'Bola basket ukuran resmi.', 'Size 7 | Kulit sintetis'),
-(15, 'Buku pengembangan diri terlaris.', '320 halaman | Bahasa Indonesia');
+(15, 'Buku pengembangan diri terlaris.', '320 halaman | Bahasa Indonesia'),
 (16, 'Hoodie oversized bahan tebal, nyaman untuk sehari-hari.', 'Ukuran:S-XXL | Warna:Abu-abu'),
 (17, 'Smartphone entry-mid dengan performa cepat.', '256GB | Warna:Hitam'),
 (18, 'Face wash untuk kulit cerah dan bersih.', '100ml'),
@@ -141,7 +141,7 @@ VALUES
 (12, 'https://images.unsplash.com/photo-1558997519-83ea9252edf8', 1),
 (13, 'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f', 1),
 (14, 'https://images.unsplash.com/photo-1519861531473-9200262188bf', 1),
-(15, 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c', 1);
+(15, 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c', 1),
 (16, 'https://images.unsplash.com/photo-1556821840-3a63f95609a7', 1),
 (17, 'https://images.unsplash.com/photo-1598327105666-5b89351aff97', 1),
 (18, 'https://images.unsplash.com/photo-1556228720-195a672e8a03', 1),
@@ -181,7 +181,7 @@ VALUES
 (12, 1),                 -- IKEA Organizer: new
 (13, 4), (13, 5),        -- Decathlon Yoga Mat: star-seller, free-shipping
 (14, 2),                 -- Wilson Basketball: flash
-(15, 3), (15, 4);        -- Atomic Habits: best, star-seller
+(15, 3), (15, 4),        -- Atomic Habits: best, star-seller
 (16, 1),                 -- Zara Hoodie: new
 (17, 2), (17, 3),        -- Xiaomi Redmi Note 13: flash, best
 (18, 1),                 -- Emina Face Wash: new (no discount)
