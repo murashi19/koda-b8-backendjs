@@ -80,4 +80,11 @@ export default class UserModel {
       client.release();
     }
   }
+  static async Delete(id) {
+    const { rows } = await db.query(
+      `DELETE FROM users WHERE id = $1 RETURNING *`,
+      [id],
+    );
+    return rows[0] || null;
+  }
 }

@@ -9,6 +9,7 @@ import wishlistRoute from "./routes/wishlistRoute.js";
 import addressRoute from "./routes/addressRoute.js";
 import orderRoute from "./routes/orderRoute.js";
 import cartRoute from "./routes/cartRoute.js";
+import userRoute from "./routes/userRoute.js";
 import corsMiddleware from "./middleware/cors.js";
 
 const app = express();
@@ -61,6 +62,8 @@ app.use("/wishlist", wishlistRoute);
 app.use("/addresses", addressRoute);
 app.use("/orders", orderRoute);
 app.use("/carts", cartRoute);
+
+app.use("/users", userRoute);
 
 app.use((err, req, res, next) => {
   if (err) {
