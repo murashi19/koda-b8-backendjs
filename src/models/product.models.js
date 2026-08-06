@@ -13,9 +13,17 @@ export default class ProductModel {
         p.regular_price,
         p.discount_price,
         p.rating,
-        p.stock
+        p.review_count,
+        p.stock,
+        COALESCE(
+          array_agg(t.name) FILTER (WHERE t.name IS NOT NULL),
+          '{}'
+        ) AS tags
       FROM products p
       JOIN categories c ON c.id = p.category_id
+      LEFT JOIN product_tags pt ON pt.product_id = p.id
+      LEFT JOIN tags t ON t.id = pt.tag_id
+      GROUP BY p.id, c.name
       ORDER BY p.created_at ASC
     `);
     return rows;
