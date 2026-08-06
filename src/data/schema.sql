@@ -97,22 +97,6 @@ CREATE TABLE wishlists (
     UNIQUE (user_id, product_id)
 );
 
-INSERT INTO categories (name) VALUES
-  ('Fashion'),
-  ('Elektronik'),
-  ('Kecantikan'),
-  ('Rumah & Dapur'),
-  ('Olahraga'),
-  ('Buku & Alat Tulis');
-
-INSERT INTO tags (name) VALUES
-  ('New'),
-  ('Best Seller'),
-  ('Diskon'),
-  ('Promo'),
-  ('Flash Deal');
-
-
 CREATE TABLE addresses (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_profile_id BIGINT NOT NULL REFERENCES user_profiles(user_id) ON DELETE CASCADE,
