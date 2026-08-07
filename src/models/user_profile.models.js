@@ -4,7 +4,7 @@ export default class UserProfileModel {
   static async GetUserById(userId) {
     const { rows } = await db.query(
       `SELECT up.*, u.email
-        FROM user_profiles p
+        FROM user_profiles up
         JOIN users u ON u.id = up.user_id 
        WHERE user_id = $1`,
       [userId],
