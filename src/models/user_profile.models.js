@@ -3,7 +3,10 @@ import db from "../lib/db.js";
 export default class UserProfileModel {
   static async GetUserById(userId) {
     const { rows } = await db.query(
-      `SELECT * FROM user_profiles WHERE user_id = $1`,
+      `SELECT up.*, u.email
+        FROM user_profiles p
+        JOIN users u ON u.id = up.user_id 
+       WHERE user_id = $1`,
       [userId],
     );
     return rows[0];
