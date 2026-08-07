@@ -43,6 +43,7 @@ export async function UpdateProfileById(req, res) {
       message: "User id is required",
     });
   }
+  console.log(req.user);
   // hanya boleh update profilenya sendiri
   if (req.user.role !== "ADMIN" && String(req.user.id) !== String(id)) {
     return res.status(constants.HTTP_STATUS_FORBIDDEN).json({

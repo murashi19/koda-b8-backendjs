@@ -25,6 +25,7 @@ function authMiddleware(req, res, next) {
       id: decoded.id,
       email: decoded.email,
       full_name: decoded.full_name,
+      role: decoded.role,
     };
 
     next();

@@ -8,10 +8,11 @@ import {
 } from "../controllers/user_profile.controller.js";
 
 const router = express.Router();
+router.use(authMiddleware);
 
 /**
  * @openapi
- * /users/{id}:
+ * /profiles/{id}:
  *  get:
  *    summary: Get User Profile by ID
  *    tags: [User Profile]
@@ -79,7 +80,7 @@ router.get("/:id", GetProfileById);
 
 /**
  * @openapi
- * /users/{id}:
+ * /profiles/{id}:
  *  patch:
  *    summary: Update User Profile by ID
  *    description: Hanya pemilik profile sendiri atau ADMIN yang bisa mengubah profile ini. Field `avatar` diabaikan di endpoint ini (gunakan endpoint upload avatar terpisah).
@@ -163,7 +164,7 @@ router.patch("/:id", UpdateProfileById);
 
 /**
  * @openapi
- * /users/{id}/avatar:
+ * /profiles/{id}/avatar:
  *  put:
  *    summary: Upload/Update User Avatar
  *    description: Hanya pemilik profile sendiri atau ADMIN yang bisa mengubah avatar ini.
