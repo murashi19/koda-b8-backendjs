@@ -51,41 +51,41 @@ export async function AddToCart(req, res) {
   }
 }
 
-// export async function UpdateQuantity(req, res) {
-//   try {
-//     const { id } = req.params;
-//     const { userId, quantity } = req.body;
+export async function UpdateCartQty(req, res) {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { quantity } = req.body;
 
-//     if (!quantity) {
-//       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
-//         success: false,
-//         message: "Quantity is required",
-//       });
-//     }
+    if (!quantity || quantity < 1) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "Quantity is required and must be at least 1",
+      });
+    }
 
-//     const updated = await CartModel.UpdateQty(userId, id, quantity);
+    const updated = await CartModel.UpdateQty(userId, id, quantity);
 
-//     if (!updated) {
-//       return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
-//         success: false,
-//         message: "Cart item not found",
-//       });
-//     }
+    if (!updated) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "Cart item not found",
+      });
+    }
 
-//     return res.status(constants.HTTP_STATUS_OK).json({
-//       success: true,
-//       message: "Quantity updated",
-//       data: updated,
-//     });
-//   } catch (err) {
-//     console.error(err);
-
-//     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
-//       success: false,
-//       message: "Internal server error",
-//     });
-//   }
-// }
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "Quantity updated",
+      data: updated,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
 
 export async function DeleteCartItem(req, res) {
   try {

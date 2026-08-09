@@ -3,7 +3,7 @@ import authMiddleware from "../middleware/auth.js";
 import {
   GetCart,
   AddToCart,
-  // UpdateQuantity,
+  UpdateCartQty,
   DeleteCartItem,
 } from "../controllers/cart.controller.js";
 
@@ -148,6 +148,7 @@ router.get("/", GetCart);
  */
 router.post("/", AddToCart);
 
+router.patch("/:id", UpdateCartQty);
 /**
  * @openapi
  * /carts/{id}:

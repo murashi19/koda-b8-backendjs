@@ -15,8 +15,8 @@ VALUES
 
 INSERT INTO user_profiles (user_id, full_name, phone_number, avatar, gender, birth_date)
 VALUES
-(1, 'Administrator', '081111111111', 'https://i.pravatar.cc/300?img=1', 'MALE', '2000-01-01'),
-(2, 'Muhamad Rafli', '082222222222', 'https://i.pravatar.cc/300?img=2', 'MALE', '2003-06-10');
+(1, 'Administrator', '081111111111', 'https://i.pravatar.cc/300?img=1', 'male', '2000-01-01'),
+(2, 'Muhamad Rafli', '082222222222', 'https://i.pravatar.cc/300?img=2', 'male', '2003-06-10');
 
 -- ===========================
 -- CATEGORY

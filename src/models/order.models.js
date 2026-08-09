@@ -1,138 +1,9 @@
 import db from "../lib/db.js";
 
 export default class OrderModel {
-  // static async Checkout(userId, addressId) {
-  //   const client = await db.connect();
-
-  //   try {
-  //     await client.query("BEGIN");
-
-  //     // Ambil cart user
-  //     const { rows: cartRows } = await client.query(
-  //       `
-  //       SELECT c.id
-  //       FROM carts c
-  //       WHERE c.user_id = $1
-  //       `,
-  //       [userId],
-  //     );
-
-  //     if (cartRows.length === 0) {
-  //       throw new Error("Cart not found");
-  //     }
-
-  //     const cartId = cartRows[0].id;
-
-  //     // Ambil item cart
-  //     const { rows: cartItems } = await client.query(
-  //       `
-  //       SELECT
-  //           ci.product_id,
-  //           ci.quantity,
-  //           p.stock,
-  //           COALESCE(p.discount_price,p.regular_price) AS price
-  //       FROM cart_items ci
-  //       JOIN products p
-  //           ON p.id = ci.product_id
-  //       WHERE ci.cart_id = $1
-  //       AND ci.is_selected = true
-  //       `,
-  //       [cartId],
-  //     );
-
-  //     if (cartItems.length === 0) {
-  //       throw new Error("Cart is empty");
-  //     }
-
-  //     let subtotal = 0;
-
-  //     for (const item of cartItems) {
-  //       if (item.stock < item.quantity) {
-  //         throw new Error("Insufficient stock");
-  //       }
-
-  //       subtotal += Number(item.price) * item.quantity;
-  //     }
-
-  //     const shippingCost = 0;
-  //     const total = subtotal + shippingCost;
-
-  //     // Insert Order
-  //     const { rows: orderRows } = await client.query(
-  //       `
-  //       INSERT INTO orders(
-  //           user_id,
-  //           address_id,
-  //           subtotal,
-  //           shipping_cost,
-  //           total
-  //       )
-  //       VALUES($1,$2,$3,$4,$5)
-  //       RETURNING *
-  //       `,
-  //       [userId, addressId, subtotal, shippingCost, total],
-  //     );
-
-  //     const order = orderRows[0];
-
-  //     // Insert Order Items + Update Stock
-  //     for (const item of cartItems) {
-  //       await client.query(
-  //         `
-  //         INSERT INTO order_items(
-  //             order_id,
-  //             product_id,
-  //             price,
-  //             quantity,
-  //             subtotal
-  //         )
-  //         VALUES($1,$2,$3,$4,$5)
-  //         `,
-  //         [
-  //           order.id,
-  //           item.product_id,
-  //           item.price,
-  //           item.quantity,
-  //           Number(item.price) * item.quantity,
-  //         ],
-  //       );
-
-  //       await client.query(
-  //         `
-  //         UPDATE products
-  //         SET stock = stock - $1
-  //         WHERE id = $2
-  //         `,
-  //         [item.quantity, item.product_id],
-  //       );
-  //     }
-
-  //     // Hapus item cart yang di-checkout
-  //     await client.query(
-  //       `
-  //       DELETE FROM cart_items
-  //       WHERE cart_id = $1
-  //       AND is_selected = true
-  //       `,
-  //       [cartId],
-  //     );
-
-  //     await client.query("COMMIT");
-
-  //     return order;
-  //   } catch (err) {
-  //     await client.query("ROLLBACK");
-  //     throw err;
-  //   } finally {
-  //     client.release();
-  //   }
-  // }
-
   static async CreateOrderFromCart(userId, payload) {
     const { shippingMethod, paymentMethod, shippingCost, addressId } = payload;
-
     const client = await db.connect();
-
     try {
       await client.query("BEGIN");
 
@@ -172,7 +43,6 @@ export default class OrderModel {
         err.code = "EMPTY_CART";
         throw err;
       }
-
       // validasi stok
       const outOfStock = cartRows.find((item) => item.quantity > item.stock);
       if (outOfStock) {
@@ -182,15 +52,13 @@ export default class OrderModel {
         err.code = "OUT_OF_STOCK";
         throw err;
       }
-
       const subtotal = cartRows.reduce((sum, item) => {
         const price = Number(item.discount_price ?? item.regular_price);
         return sum + price * item.quantity;
       }, 0);
       const total = subtotal + Number(shippingCost || 0);
-
       const orderCode = `INV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-
+      const status = "PENDING";
       const { rows: orderRows } = await client.query(
         `
         INSERT INTO orders
@@ -199,15 +67,16 @@ export default class OrderModel {
            address_id,
            created_at, updated_at)
         VALUES
-          ($1, $2, 'pending', $3, $4, $5,
-           $6, $7,
-           $8,
+          ($1, $2, $3, $4, $5, $6,
+           $7, $8,
+           $9,
            now(), now())
         RETURNING *
         `,
         [
           orderCode,
           userId,
+          status,
           subtotal,
           shippingCost || 0,
           total,
@@ -246,9 +115,7 @@ export default class OrderModel {
 
       // kosongkan cart
       await client.query(`DELETE FROM cart_items WHERE user_id = $1`, [userId]);
-
       await client.query("COMMIT");
-
       order.items = cartRows.map((item) => ({
         product_id: item.product_id,
         name: item.name,
@@ -271,14 +138,28 @@ export default class OrderModel {
   static async GetOrders(userId) {
     const { rows } = await db.query(
       `
-      SELECT *
-      FROM orders
-      WHERE user_id = $1
-      ORDER BY created_at DESC
-      `,
+    SELECT
+      o.*,
+      COALESCE(
+        json_agg(
+          json_build_object(
+            'product_id', oi.product_id,
+            'name', oi.product_name,
+            'image', oi.product_image,
+            'price', oi.price,
+            'qty', oi.qty,
+            'subtotal', oi.subtotal
+          )
+        ) FILTER (WHERE oi.id IS NOT NULL), '[]'
+      ) AS items
+    FROM orders o
+    LEFT JOIN order_items oi ON oi.order_id = o.id
+    WHERE o.user_id = $1
+    GROUP BY o.id
+    ORDER BY o.created_at DESC
+    `,
       [userId],
     );
-
     return rows;
   }
 
@@ -289,7 +170,7 @@ export default class OrderModel {
           o.*,
           oi.product_id,
           oi.price,
-          oi.quantity,
+          oi.qty,
           oi.subtotal,
           p.name,
           p.image
