@@ -1,5 +1,14 @@
 import ProductModel from "../models/product.models.js";
 import { constants } from "node:http2";
+import path from "node:path";
+
+function resolveUploadedImagePath(file) {
+  const publicPath = path
+    .relative("public", file.path)
+    .split(path.sep)
+    .join("/");
+  return `/${publicPath}`;
+}
 
 export async function GetAllProduct(req, res) {
   try {
@@ -47,18 +56,23 @@ export async function CreateProduct(req, res) {
     const {
       brand,
       name,
-      image,
       category_id,
       regular_price,
       discount_price,
       stock,
+      description,
     } = req.body;
 
+    const image = req.file
+      ? resolveUploadedImagePath(req.file)
+      : req.body.image;
+
     // validasi field wajib
-    if (!brand || !name || !category_id || !regular_price) {
+    if (!brand || !name || !category_id || !regular_price || !image) {
       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
         success: false,
-        message: "brand, name, category_id, dan regular_price wajib diisi",
+        message:
+          "brand, name, category_id, regular_price, dan image wajib diisi",
       });
     }
 
@@ -68,8 +82,9 @@ export async function CreateProduct(req, res) {
       image,
       category_id,
       regular_price,
-      discount_price,
+      discount_price: discount_price || null,
       stock,
+      description,
     });
 
     return res.status(constants.HTTP_STATUS_CREATED).json({
@@ -96,6 +111,9 @@ export async function UpdateProduct(req, res) {
   }
 
   const { ...data } = req.body;
+  if (req.file) {
+    data.image = resolveUploadedImagePath(req.file);
+  }
   if (!data || Object.keys(data).length === 0) {
     return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
       success: false,
@@ -132,9 +150,23 @@ export async function deleteProduct(req, res) {
       message: "Product not found",
     });
   }
-  const destroy = await ProductModel.DeleteProduct(id);
-  res.json({
-    success: true,
-    message: "Deleted product successfully",
-  });
+  try {
+    const destroyed = await ProductModel.DeleteProduct(id);
+    if (!destroyed) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "Deleted product successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
 }

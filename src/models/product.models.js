@@ -9,18 +9,21 @@ export default class ProductModel {
         p.brand,
         p.name,
         p.image,
+        p.category_id,
         c.name AS category_name,
         p.regular_price,
         p.discount_price,
         p.rating,
         p.review_count,
         p.stock,
+        MAX(pd.description) AS description,
         COALESCE(
           array_agg(t.name) FILTER (WHERE t.name IS NOT NULL),
           '{}'
         ) AS tags
       FROM products p
       JOIN categories c ON c.id = p.category_id
+      LEFT JOIN product_details pd ON pd.product_id = p.id
       LEFT JOIN product_tags pt ON pt.product_id = p.id
       LEFT JOIN tags t ON t.id = pt.tag_id
       GROUP BY p.id, c.name
@@ -94,6 +97,7 @@ export default class ProductModel {
       regular_price,
       discount_price,
       stock,
+      description,
     } = data;
 
     const { rows } = await db.query(
@@ -105,7 +109,16 @@ export default class ProductModel {
       `,
       [brand, name, image, category_id, regular_price, discount_price, stock],
     );
-    return rows[0];
+    const product = rows[0];
+
+    if (description) {
+      await db.query(
+        `INSERT INTO product_details (product_id, description) VALUES ($1, $2)`,
+        [product.id, description],
+      );
+    }
+
+    return product;
   }
 
   // UPDATE
@@ -118,6 +131,7 @@ export default class ProductModel {
       regular_price,
       discount_price,
       stock,
+      description,
     } = data;
 
     const { rows } = await db.query(
@@ -146,7 +160,28 @@ export default class ProductModel {
         productId,
       ],
     );
-    return rows[0] || null;
+    const product = rows[0] || null;
+    if (!product) return null;
+
+    // product_details belum punya UNIQUE(product_id), jadi upsert manual: cek dulu baru insert/update
+    if (description !== undefined) {
+      const existing = await db.query(
+        `SELECT id FROM product_details WHERE product_id = $1`,
+        [productId],
+      );
+      if (existing.rows[0]) {
+        await db.query(
+          `UPDATE product_details SET description = $1, updated_at = now() WHERE product_id = $2`,
+          [description, productId],
+        );
+      } else {
+        await db.query(
+          `INSERT INTO product_details (product_id, description) VALUES ($1, $2)`,
+          [productId, description],
+        );
+      }
+    }
+    return product;
   }
 
   // DELETE
