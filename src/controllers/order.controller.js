@@ -133,7 +133,15 @@ export async function UpdateOrderStatus(req, res) {
       });
     }
 
-    const order = await OrderModel.UpdateStatus(id, status);
+    const isAdmin = req.user.role === "ADMIN";
+    if (!isAdmin && status !== "PAID") {
+      return res.status(constants.HTTP_STATUS_FORBIDDEN).json({
+        success: false,
+        message: "Kamu hanya bisa menandai pesanan sebagai sudah dibayar",
+      });
+    }
+    const scopeToUserId = isAdmin ? null : req.user.id;
+    const order = await OrderModel.UpdateStatus(id, status, scopeToUserId);
 
     if (!order) {
       return res.status(constants.HTTP_STATUS_NOT_FOUND).json({

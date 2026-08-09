@@ -58,7 +58,7 @@ export default class OrderModel {
       }, 0);
       const total = subtotal + Number(shippingCost || 0);
       const orderCode = `INV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-      const status = "PENDING";
+      const status = "PAID";
       const { rows: orderRows } = await client.query(
         `
         INSERT INTO orders
@@ -188,7 +188,8 @@ export default class OrderModel {
     return rows;
   }
 
-  static async UpdateStatus(orderId, status) {
+  static async UpdateStatus(orderId, status, userId = null) {
+    const params = userId ? [status, orderId, userId] : [status, orderId];
     const { rows } = await db.query(
       `
       UPDATE orders
@@ -196,9 +197,10 @@ export default class OrderModel {
         status = $1,
         updated_at = NOW()
       WHERE id = $2
+      ${userId ? "AND user_id = $3" : ""}
       RETURNING *
       `,
-      [status, orderId],
+      params,
     );
 
     return rows[0];
