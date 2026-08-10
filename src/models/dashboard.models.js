@@ -1,5 +1,4 @@
 import db from "../lib/db.js";
-
 export default class DashboardModel {
   static async GetStats() {
     const { rows } = await db.query(`
@@ -46,17 +45,18 @@ export default class DashboardModel {
     return { ...rows[0], ...productRows[0] };
   }
 
+  // Pendapatan & jumlah pesanan per bulan, 12 bulan terakhir (buat area chart)
   static async GetRevenueByMonth() {
     const { rows } = await db.query(`
       SELECT
-        to_char(month, 'Mon') AS month,
+        to_char(gm.month, 'Mon') AS month,
         COALESCE(o.revenue, 0) AS revenue,
         COALESCE(o.orders, 0) AS orders
       FROM generate_series(
         date_trunc('month', now() - interval '11 month'),
         date_trunc('month', now()),
         interval '1 month'
-      ) AS month
+      ) AS gm(month)
       LEFT JOIN (
         SELECT
           date_trunc('month', created_at) AS month,
@@ -65,8 +65,8 @@ export default class DashboardModel {
         FROM orders
         WHERE status != 'CANCELLED'
         GROUP BY date_trunc('month', created_at)
-      ) o ON o.month = month
-      ORDER BY month ASC
+      ) o ON o.month = gm.month
+      ORDER BY gm.month ASC
     `);
     return rows;
   }

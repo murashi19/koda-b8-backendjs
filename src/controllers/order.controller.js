@@ -180,3 +180,29 @@ export async function GetAllOrders(req, res) {
     });
   }
 }
+
+export async function GetOrderDetailAdmin(req, res) {
+  try {
+    const { id } = req.params;
+    const order = await OrderModel.GetOrderDetailAdmin(id);
+
+    if (!order.length) {
+      return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "Get order successfully",
+      data: order,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}

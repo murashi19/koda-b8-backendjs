@@ -58,6 +58,8 @@ export default class OrderModel {
       }, 0);
       const total = subtotal + Number(shippingCost || 0);
       const orderCode = `INV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+      // STATUS LUNAS karena belum pakai payment gateway atau payment manual
       const status = "PAID";
       const { rows: orderRows } = await client.query(
         `
@@ -188,6 +190,42 @@ export default class OrderModel {
     return rows;
   }
 
+  // GET DETAIL ORDER FOR ADMIN
+  static async GetOrderDetailAdmin(orderId) {
+    const { rows } = await db.query(
+      `
+      SELECT
+          o.*,
+          up.full_name,
+          u.email,
+          oi.product_id,
+          oi.price,
+          oi.qty,
+          oi.subtotal,
+          p.name,
+          p.image,
+          a.label AS address_label,
+          a.province AS address_province,
+          a.city AS address_city,
+          a.district AS address_district,
+          a.subdistrict AS address_subdistrict,
+          a.postal_code AS address_postal_code,
+          a.address AS address_detail,
+          a.note AS address_note
+      FROM orders o
+      JOIN users u ON u.id = o.user_id
+      JOIN user_profiles up ON up.user_id = u.id
+      JOIN order_items oi ON oi.order_id = o.id
+      JOIN products p ON p.id = oi.product_id
+      LEFT JOIN addresses a ON a.id = o.address_id
+      WHERE o.id = $1
+      `,
+      [orderId],
+    );
+
+    return rows;
+  }
+
   static async UpdateStatus(orderId, status, userId = null) {
     const params = userId ? [status, orderId, userId] : [status, orderId];
     const { rows } = await db.query(
@@ -211,7 +249,9 @@ export default class OrderModel {
       `
     SELECT
       o.*,
-      up.full_name
+      up.full_name,
+      u.email,
+      (SELECT COUNT(*) FROM order_items oi WHERE oi.order_id = o.id) AS item_count
     FROM orders o
     JOIN users u
       ON u.id = o.user_id

@@ -1,5 +1,9 @@
 import { Router } from "express";
 import { GetDashboardSummary } from "../controllers/dashboard.controller.js";
+import {
+  GetAllOrders,
+  GetOrderDetailAdmin,
+} from "../controllers/order.controller.js";
 import authMiddleware from "../middleware/auth.js";
 import requireAdmin from "../middleware/admin.js";
 
@@ -22,5 +26,49 @@ const router = Router();
  *         description: Forbidden, admin only
  */
 router.get("/dashboard", authMiddleware, requireAdmin, GetDashboardSummary);
+
+/**
+ * @openapi
+ * /admin/orders:
+ *   get:
+ *     summary: Get all orders from every customer (admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all orders
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden, admin only
+ */
+router.get("/orders", authMiddleware, requireAdmin, GetAllOrders);
+
+/**
+ * @openapi
+ * /admin/orders/{id}:
+ *   get:
+ *     summary: Get any order's detail by ID (admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Order detail
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden, admin only
+ *       404:
+ *         description: Order not found
+ */
+router.get("/orders/:id", authMiddleware, requireAdmin, GetOrderDetailAdmin);
 
 export default router;
