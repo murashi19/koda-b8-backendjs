@@ -5,8 +5,11 @@ import {
   CreateProduct,
   GetProductById,
   UpdateProduct,
+  deleteProduct,
 } from "../controllers/product.controller.js";
 import authMiddleware from "../middleware/auth.js";
+import requireAdmin from "../middleware/admin.js";
+import uploadProductImage from "../middleware/uploadProduct.js";
 const router = express.Router();
 
 /**
@@ -194,7 +197,13 @@ router.get("/:id", GetProductById);
  *      500:
  *        description: Failed to create product
  */
-router.post("/", authMiddleware, CreateProduct);
+router.post(
+  "/",
+  authMiddleware,
+  requireAdmin,
+  uploadProductImage.single("image"),
+  CreateProduct,
+);
 
 /**
  * @openapi
@@ -252,6 +261,41 @@ router.post("/", authMiddleware, CreateProduct);
  *      500:
  *        description: Failed to update product
  */
-router.patch("/:id", authMiddleware, UpdateProduct);
+router.patch(
+  "/:id",
+  authMiddleware,
+  requireAdmin,
+  uploadProductImage.single("image"),
+  UpdateProduct,
+);
+
+/**
+ * @openapi
+ * /products/{id}:
+ *  delete:
+ *    summary: Delete Product by ID
+ *    tags: [Products]
+ *    security:
+ *      - bearerAuth: []
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        required: true
+ *        schema:
+ *          type: integer
+ *        description: Product ID to delete
+ *    responses:
+ *      200:
+ *        description: Product deleted successfully
+ *      401:
+ *        description: Unauthorized, token missing or invalid
+ *      403:
+ *        description: Forbidden, admin only
+ *      404:
+ *        description: Product not found
+ *      500:
+ *        description: Failed to delete product
+ */
+router.delete("/:id", authMiddleware, requireAdmin, deleteProduct);
 
 export default router;

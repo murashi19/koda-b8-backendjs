@@ -98,6 +98,7 @@ export default class ProductModel {
       discount_price,
       stock,
       description,
+      tagIds,
     } = data;
 
     const { rows } = await db.query(
@@ -118,11 +119,43 @@ export default class ProductModel {
       );
     }
 
+    if (Array.isArray(tagIds) && tagIds.length > 0) {
+      await ProductModel.SetProductTags(product.id, tagIds);
+      product.tags = await ProductModel.GetProductTagNames(product.id);
+    } else {
+      product.tags = [];
+    }
+
     return product;
   }
 
+  // Ganti seluruh tag produk (dipakai create & update) — hapus yang lama, insert yang baru.
+  static async SetProductTags(productId, tagIds) {
+    await db.query(`DELETE FROM product_tags WHERE product_id = $1`, [
+      productId,
+    ]);
+    if (!Array.isArray(tagIds) || tagIds.length === 0) return;
+
+    const values = tagIds.map((_, i) => `($1, $${i + 2})`).join(", ");
+    await db.query(
+      `INSERT INTO product_tags (product_id, tag_id) VALUES ${values}
+       ON CONFLICT DO NOTHING`,
+      [productId, ...tagIds],
+    );
+  }
+
+  static async GetProductTagNames(productId) {
+    const { rows } = await db.query(
+      `SELECT t.name FROM product_tags pt
+       JOIN tags t ON t.id = pt.tag_id
+       WHERE pt.product_id = $1`,
+      [productId],
+    );
+    return rows.map((r) => r.name);
+  }
+
   // UPDATE
-  static async UpdateProduct(productId, data) {
+  static async UpdateProduct(productId, data, tagIds) {
     const {
       brand,
       name,
@@ -134,6 +167,13 @@ export default class ProductModel {
       description,
     } = data;
 
+    const discountPriceValue =
+      discount_price === undefined
+        ? undefined
+        : discount_price === "" || discount_price === null
+          ? null
+          : discount_price;
+
     const { rows } = await db.query(
       `
     UPDATE products
@@ -143,7 +183,7 @@ export default class ProductModel {
       image = COALESCE($3, image),
       category_id = COALESCE($4, category_id),
       regular_price = COALESCE($5, regular_price),
-      discount_price = COALESCE($6, discount_price),
+      discount_price = CASE WHEN $9 THEN $6 ELSE discount_price END,
       stock = COALESCE($7, stock),
       updated_at = now()
     WHERE id = $8
@@ -155,9 +195,10 @@ export default class ProductModel {
         image,
         category_id,
         regular_price,
-        discount_price,
+        discountPriceValue ?? null,
         stock,
         productId,
+        discountPriceValue !== undefined,
       ],
     );
     const product = rows[0] || null;
@@ -181,6 +222,12 @@ export default class ProductModel {
         );
       }
     }
+
+    if (tagIds !== undefined) {
+      await ProductModel.SetProductTags(productId, tagIds);
+    }
+    product.tags = await ProductModel.GetProductTagNames(productId);
+
     return product;
   }
 

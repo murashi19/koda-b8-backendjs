@@ -10,6 +10,14 @@ function resolveUploadedImagePath(file) {
   return `/${publicPath}`;
 }
 
+function parseTagIds(body) {
+  if (!body || body.has_tag_ids === undefined) return undefined;
+  const raw = body.tag_ids;
+  if (raw === undefined) return [];
+  const list = Array.isArray(raw) ? raw : [raw];
+  return list.map((v) => Number(v)).filter((v) => Number.isInteger(v) && v > 0);
+}
+
 export async function GetAllProduct(req, res) {
   try {
     const products = await ProductModel.GetAllProduct();
@@ -76,6 +84,8 @@ export async function CreateProduct(req, res) {
       });
     }
 
+    const tagIds = parseTagIds(req.body);
+
     const newProduct = await ProductModel.CreateProduct({
       brand,
       name,
@@ -85,6 +95,7 @@ export async function CreateProduct(req, res) {
       discount_price: discount_price || null,
       stock,
       description,
+      tagIds,
     });
 
     return res.status(constants.HTTP_STATUS_CREATED).json({
@@ -110,18 +121,25 @@ export async function UpdateProduct(req, res) {
     });
   }
 
-  const { ...data } = req.body;
+  const { has_tag_ids, tag_ids, ...data } = req.body;
   if (req.file) {
     data.image = resolveUploadedImagePath(req.file);
   }
-  if (!data || Object.keys(data).length === 0) {
+
+  if (data.regular_price !== undefined && data.discount_price === undefined) {
+    data.discount_price = "";
+  }
+
+  const tagIds = has_tag_ids !== undefined ? parseTagIds(req.body) : undefined;
+
+  if ((!data || Object.keys(data).length === 0) && tagIds === undefined) {
     return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
       success: false,
       message: "No data to update",
     });
   }
   try {
-    const updateProduct = await ProductModel.UpdateProduct(id, data);
+    const updateProduct = await ProductModel.UpdateProduct(id, data, tagIds);
     if (!updateProduct) {
       return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
         success: false,
