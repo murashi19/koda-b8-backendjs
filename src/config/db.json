@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "1",
+    "database": "weekly",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "postgres",
+    "password": "iMnCvFu/vLsFT6B3aEiazeo+Yeg=",
+    "database": "belimudah",
+    "host": "103.127.96.192:9101",
+    "dialect": "postgres"
+  }
+}

@@ -1,6 +1,9 @@
-import UserProfileModel from "../models/user_profile.models.js";
+// import UserProfileModel from "../models/user_profile.models.js";
+import { default as db } from "../models/index.cjs";
 import { constants } from "node:http2";
 import path from "node:path";
+
+const { UserProfiles, Users } = db;
 
 export async function GetProfileById(req, res) {
   const { id } = req.params;
@@ -12,8 +15,15 @@ export async function GetProfileById(req, res) {
   }
 
   try {
-    const userProfile = await UserProfileModel.GetUserById(id);
-
+    const userProfile = await UserProfiles.findByPk(id, {
+      include: [
+        {
+          model: Users,
+          attributes: ["email"],
+        },
+      ],
+    });
+    console.log(JSON.stringify(userProfile, null, 2));
     if (!userProfile) {
       return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
         success: false,
@@ -43,7 +53,7 @@ export async function UpdateProfileById(req, res) {
       message: "User id is required",
     });
   }
-  console.log(req.user);
+  // console.log(req.user);
   // hanya boleh update profilenya sendiri
   if (req.user.role !== "ADMIN" && String(req.user.id) !== String(id)) {
     return res.status(constants.HTTP_STATUS_FORBIDDEN).json({
@@ -61,13 +71,16 @@ export async function UpdateProfileById(req, res) {
   }
 
   try {
-    const updatedProfile = await UserProfileModel.UpdateProfile(id, data);
-    if (!updatedProfile) {
+    const [updateRow] = await UserProfiles.update(data, {
+      where: { user_id: id },
+    });
+    if (updateRow === 0) {
       return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
         success: false,
-        message: "User not found",
+        message: "User profile not found",
       });
     }
+    const updatedProfile = await UserProfiles.findByPk(id);
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "Update Profile Successfully",
@@ -106,17 +119,20 @@ export async function UploadAvatarById(req, res) {
   const avatarUrl = `/${publicPath}`;
 
   try {
-    const updatedProfile = await UserProfileModel.UpdateProfile(id, {
-      avatar: avatarUrl,
-    });
+    const [updatedRows] = await UserProfiles.update(
+      {
+        avatar: avatarUrl,
+      },
+      { where: { user_id: id } },
+    );
 
-    if (!updatedProfile) {
+    if (updatedRows === 0) {
       return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
         success: false,
-        message: "User not found",
+        message: "User profile not found",
       });
     }
-
+    const updatedProfile = updatedRows;
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "Upload Avatar Successfully",
