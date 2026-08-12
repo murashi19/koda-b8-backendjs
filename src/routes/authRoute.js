@@ -75,6 +75,9 @@ router.post("/register", register);
  *        application/json:
  *          schema:
  *            $ref: '#/components/schemas/LoginInput'
+ *        application/x-www-form-urlencoded:
+ *          schema:
+ *            $ref: '#/components/schemas/LoginInput'
  *    responses:
  *      200:
  *        description: Login Successfully

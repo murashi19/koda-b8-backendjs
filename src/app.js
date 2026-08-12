@@ -33,7 +33,7 @@ const options = {
       },
     ],
     components: {
-      securiReleasestySchemes: {
+      securitySchemes: {
         bearerAuth: {
           type: "http",
           scheme: "bearer",
