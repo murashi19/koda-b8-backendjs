@@ -1,7 +1,8 @@
-// import UserProfileModel from "../models/user_profile.models.js";
 import { default as db } from "../models/index.cjs";
 import { constants } from "node:http2";
 import path from "node:path";
+import { logSuccess, logError, logInfo } from "../lib/logger.js";
+import { uploadToCloudinary } from "../lib/cloudinary.js";
 
 const { UserProfiles, Users } = db;
 
@@ -15,6 +16,8 @@ export async function GetProfileById(req, res) {
   }
 
   try {
+    logInfo(`Fetching profile for user ${id}`);
+
     const userProfile = await UserProfiles.findByPk(id, {
       include: [
         {
@@ -23,21 +26,23 @@ export async function GetProfileById(req, res) {
         },
       ],
     });
-    console.log(JSON.stringify(userProfile, null, 2));
+
     if (!userProfile) {
+      logError(`Profile not found for user ${id}`);
       return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
         success: false,
         message: "User not found",
       });
     }
 
+    logSuccess(`Fetched profile for user ${id}`);
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "Get User Successfully",
       data: userProfile,
     });
   } catch (err) {
-    console.error(err);
+    logError(`Failed to fetch profile for user ${id}: ${err.message}`);
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error",
@@ -53,9 +58,11 @@ export async function UpdateProfileById(req, res) {
       message: "User id is required",
     });
   }
-  // console.log(req.user);
   // hanya boleh update profilenya sendiri
   if (req.user.role !== "ADMIN" && String(req.user.id) !== String(id)) {
+    logError(
+      `Forbidden: user ${req.user.id} tried to update profile of user ${id}`,
+    );
     return res.status(constants.HTTP_STATUS_FORBIDDEN).json({
       success: false,
       message: "Forbidden: kamu tidak ada akses mengubah profile user lain",
@@ -71,23 +78,28 @@ export async function UpdateProfileById(req, res) {
   }
 
   try {
+    logInfo(`Updating profile for user ${id}`);
+
     const [updateRow] = await UserProfiles.update(data, {
       where: { user_id: id },
     });
     if (updateRow === 0) {
+      logError(`Profile not found for user ${id}`);
       return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
         success: false,
         message: "User profile not found",
       });
     }
     const updatedProfile = await UserProfiles.findByPk(id);
+
+    logSuccess(`Profile updated for user ${id}`);
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "Update Profile Successfully",
       data: updatedProfile,
     });
   } catch (err) {
-    console.error(err);
+    logError(`Failed to update profile for user ${id}: ${err.message}`);
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error",
@@ -97,12 +109,21 @@ export async function UpdateProfileById(req, res) {
 
 export async function UploadAvatarById(req, res) {
   const { id } = req.params;
+
+  // User hanya boleh mengubah avatar sendiri,
+  // kecuali ADMIN
   if (req.user.role !== "ADMIN" && String(req.user.id) !== String(id)) {
+    logError(
+      `Forbidden: user ${req.user.id} tried to change avatar of user ${id}`,
+    );
+
     return res.status(constants.HTTP_STATUS_FORBIDDEN).json({
       success: false,
       message: "Forbidden: kamu tidak ada akses mengubah avatar user lain",
     });
   }
+
+  // Pastikan file ada
   if (!req.file) {
     return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
       success: false,
@@ -110,36 +131,54 @@ export async function UploadAvatarById(req, res) {
     });
   }
 
-  // path fisik di disk misalnya: public/uploads/avatars/2026-08-04/12-1735999999999.jpg
-  // yang disimpan ke DB cuma path relatif publiknya, bukan path asli di server
-  const publicPath = path
-    .relative("public", req.file.path)
-    .split(path.sep)
-    .join("/");
-  const avatarUrl = `/${publicPath}`;
-
   try {
+    logInfo(`Uploading avatar for user ${id}`);
+
+    // Upload buffer dari Multer ke Cloudinary
+    const result = await uploadToCloudinary(req.file.buffer, {
+      folder: "avatars",
+      public_id: `user-${id}`,
+      overwrite: true,
+    });
+
+    // Simpan URL Cloudinary + public ID ke database
     const [updatedRows] = await UserProfiles.update(
       {
-        avatar: avatarUrl,
+        avatar: result.secure_url,
+        avatar_public_id: result.public_id,
       },
-      { where: { user_id: id } },
+      {
+        where: {
+          user_id: id,
+        },
+      },
     );
 
     if (updatedRows === 0) {
+      logError(`Profile not found for user ${id}`);
+
       return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
         success: false,
         message: "User profile not found",
       });
     }
-    const updatedProfile = updatedRows;
+
+    const updatedProfile = await UserProfiles.findOne({
+      where: {
+        user_id: id,
+      },
+    });
+
+    logSuccess(`Avatar updated for user ${id}: ${result.secure_url}`);
+
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "Upload Avatar Successfully",
       data: updatedProfile,
     });
   } catch (err) {
-    console.error(err);
+    logError(`Failed to upload avatar for user ${id}: ${err.message}`);
+
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error",

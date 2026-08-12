@@ -9,7 +9,10 @@ import {
 } from "../controllers/product.controller.js";
 import authMiddleware from "../middleware/auth.js";
 import requireAdmin from "../middleware/admin.js";
-import uploadProductImage from "../middleware/uploadProduct.js";
+import {
+  uploadProductImage,
+  handleUploadError,
+} from "../middleware/uploadProduct.js";
 const router = express.Router();
 
 /**
@@ -202,6 +205,7 @@ router.post(
   authMiddleware,
   requireAdmin,
   uploadProductImage.single("image"),
+  handleUploadError,
   CreateProduct,
 );
 
@@ -266,6 +270,7 @@ router.patch(
   authMiddleware,
   requireAdmin,
   uploadProductImage.single("image"),
+  handleUploadError,
   UpdateProduct,
 );
 

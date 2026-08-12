@@ -13,6 +13,12 @@ module.exports = (sequelize, DataTypes) => {
         targetKey: "id",
         onDelete: "CASCADE",
       });
+      UserProfiles.hasMany(models.Addresses, {
+        foreignKey: "user_profile_id",
+        sourceKey: "user_id",
+        as: "addresses",
+        onDelete: "CASCADE",
+      });
     }
   }
   UserProfiles.init(
@@ -40,6 +46,11 @@ module.exports = (sequelize, DataTypes) => {
 
       avatar: {
         type: DataTypes.STRING(500),
+        allowNull: true,
+      },
+
+      avatar_public_id: {
+        type: DataTypes.STRING(255),
         allowNull: true,
       },
 

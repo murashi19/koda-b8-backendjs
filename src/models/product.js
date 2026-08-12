@@ -48,6 +48,8 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Product",
       tableName: "products",
       underscored: true,
+      createdAt: "created_at",
+      updatedAt: "updated_at",
     },
   );
   return Product;
