@@ -238,7 +238,6 @@ VALUES
 (30, 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be', 2),
 (30, 'https://images.unsplash.com/photo-1556228720-195a672e8a03', 3),
 (31, 'https://images.unsplash.com/photo-1590794056226-79ef3a8147e1', 2),
-(1, 'https://images.unsplash.com/photo-1551028719-00167b16eac5', 3),
 (32, 'https://images.unsplash.com/photo-1556821840-3a63f95609a7', 1),
 (32, 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab', 2),
 (32, 'https://images.unsplash.com/photo-1552346154-21d32810aba3', 3),

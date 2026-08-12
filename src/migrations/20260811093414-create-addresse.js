@@ -1,64 +1,76 @@
 "use strict";
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("addresses", {
       id: {
+        type: Sequelize.BIGINT,
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.BIGINT,
       },
       user_profile_id: {
+        type: Sequelize.BIGINT,
         allowNull: false,
-        references: user_profiles,
-        key: user_id,
+        references: {
+          model: "user_profiles",
+          key: "user_id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
       label: {
-        allowNull: false,
         type: Sequelize.STRING,
+        allowNull: false,
       },
       province: {
-        allowNull: false,
         type: Sequelize.STRING,
+        allowNull: false,
       },
       city: {
-        allowNull: false,
         type: Sequelize.STRING,
+        allowNull: false,
       },
       district: {
         type: Sequelize.STRING,
+        allowNull: true,
       },
       subdistrict: {
         type: Sequelize.STRING,
+        allowNull: true,
       },
       postal_code: {
         type: Sequelize.STRING,
+        allowNull: true,
       },
       address: {
-        allowNull: false,
         type: Sequelize.STRING,
+        allowNull: false,
       },
       note: {
         type: Sequelize.TEXT,
+        allowNull: true,
       },
       is_default: {
         type: Sequelize.BOOLEAN,
+        allowNull: false,
         defaultValue: false,
       },
       createdAt: {
-        allowNull: false,
         type: Sequelize.DATE,
+        allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
       updatedAt: {
-        allowNull: false,
         type: Sequelize.DATE,
+        allowNull: false,
         defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
     });
   },
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Addresses");
+
+  async down(queryInterface) {
+    await queryInterface.dropTable("addresses");
   },
 };

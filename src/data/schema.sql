@@ -34,58 +34,58 @@
 -- ON users(role);
 
 -- CATEGORY
-CREATE TABLE categories(
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(255)
-);
+-- CREATE TABLE categories(
+--     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+--     name VARCHAR(255)
+-- );
 
 -- PRODUCT
-CREATE TABLE products(
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    brand VARCHAR(100) NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    image VARCHAR(500) NOT NULL,
-    category_id BIGINT REFERENCES categories(id),
-    regular_price DECIMAL(12,2) NOT NULL,
-    discount_price DECIMAL(12,2) NULL,
-    rating DECIMAL(2,1) DEFAULT 0,           
-    review_count INT DEFAULT 0,
-    stock INT DEFAULT 0,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
+-- CREATE TABLE products(
+--     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+--     brand VARCHAR(100) NOT NULL,
+--     name VARCHAR(255) NOT NULL,
+--     image VARCHAR(500) NOT NULL,
+--     category_id BIGINT REFERENCES categories(id),
+--     regular_price DECIMAL(12,2) NOT NULL,
+--     discount_price DECIMAL(12,2) NULL,
+--     rating DECIMAL(2,1) DEFAULT 0,           
+--     review_count INT DEFAULT 0,
+--     stock INT DEFAULT 0,
+--     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+-- );
 
 -- PRODUCT DETAILS
-CREATE TABLE product_details (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
-    description TEXT,
-    specifications TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- CREATE TABLE product_details (
+--     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+--     product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
+--     description TEXT,
+--     specifications TEXT,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
 
 -- PRODUCT IMAGE
-CREATE TABLE product_images (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
-    image_url VARCHAR(500) NOT NULL,
-    sort_order INT DEFAULT 0
-);
+-- CREATE TABLE product_images (
+--     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+--     product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
+--     image_url VARCHAR(500) NOT NULL,
+--     sort_order INT DEFAULT 0
+-- );
 
 -- TAGS
-CREATE TABLE tags (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
-);
+-- CREATE TABLE tags (
+--     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+--     name VARCHAR(50) NOT NULL UNIQUE
+-- );
 
 -- PRODUCT TAGS
-CREATE TABLE product_tags (
-    product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
-    tag_id BIGINT REFERENCES tags(id) ON DELETE CASCADE,
+-- CREATE TABLE product_tags (
+--     product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
+--     tag_id BIGINT REFERENCES tags(id) ON DELETE CASCADE,
  
-    PRIMARY KEY (product_id, tag_id)
-);
+--     PRIMARY KEY (product_id, tag_id)
+-- );
 
 -- WISHLISTS
 CREATE TABLE wishlists (
@@ -97,21 +97,21 @@ CREATE TABLE wishlists (
     UNIQUE (user_id, product_id)
 );
 
-CREATE TABLE addresses (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_profile_id BIGINT NOT NULL REFERENCES user_profiles(user_id) ON DELETE CASCADE,
-    label VARCHAR(50) NOT NULL,
-    province VARCHAR(100) NOT NULL,
-    city VARCHAR(100) NOT NULL,
-    district VARCHAR(100),
-    subdistrict VARCHAR(100),
-    postal_code VARCHAR(10),
-    address TEXT NOT NULL,
-    note TEXT,
-    is_default BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
+-- CREATE TABLE addresses (
+--     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+--     user_profile_id BIGINT NOT NULL REFERENCES user_profiles(user_id) ON DELETE CASCADE,
+--     label VARCHAR(50) NOT NULL,
+--     province VARCHAR(100) NOT NULL,
+--     city VARCHAR(100) NOT NULL,
+--     district VARCHAR(100),
+--     subdistrict VARCHAR(100),
+--     postal_code VARCHAR(10),
+--     address TEXT NOT NULL,
+--     note TEXT,
+--     is_default BOOLEAN DEFAULT FALSE,
+--     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+-- );
 
 
 CREATE TABLE carts (
