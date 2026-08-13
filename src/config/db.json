@@ -4,6 +4,7 @@
     "password": "1",
     "database": "weekly",
     "host": "127.0.0.1",
+    "port": 5432,
     "dialect": "postgres",
     "logging": false
   },
@@ -19,7 +20,7 @@
     "password": "iMnCvFu/vLsFT6B3aEiazeo+Yeg=",
     "database": "belimudah",
     "host": "postgres",
-    "port": "9101",
+    "port": 5432,
     "dialect": "postgres"
   }
 }
