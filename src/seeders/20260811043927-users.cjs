@@ -17,7 +17,7 @@ module.exports = {
     const customerPassword = await bcrypt.hash("customer123", 10);
     await queryInterface.bulkInsert("users", [
       {
-        email: "admin@example.com",
+        email: "admin@examples.com",
         password: adminPassword,
         role: "ADMIN",
         is_verified: true,
@@ -26,7 +26,7 @@ module.exports = {
         updated_at: new Date(),
       },
       {
-        email: "customer@example.com",
+        email: "customer@examples.com",
         password: customerPassword,
         role: "CUSTOMER",
         is_verified: true,
