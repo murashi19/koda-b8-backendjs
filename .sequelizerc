@@ -1,8 +1,7 @@
-require("@babel/register");
+import "@babel/register";
+import path from "path";
 
-const path = require("path");
-
-module.exports = {
+export default {
   config: path.resolve("src", "config", "db.json"),
   "migrations-path": path.resolve("src", "migrations"),
   "seeders-path": path.resolve("src", "seeders"),
