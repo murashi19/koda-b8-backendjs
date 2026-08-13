@@ -2,16 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    /**
-     * Add seed commands here.
-     *
-     * Example:
-     * await queryInterface.bulkInsert('People', [{
-     *   name: 'John Doe',
-     *   isBetaMember: false
-     * }], {});
-     */
+  async up(queryInterface) {
     const categories = [
       "Fashion",
       "Elektronik",
@@ -22,45 +13,52 @@ module.exports = {
     ];
 
     for (const name of categories) {
-      await queryInterface.sequelize.query(
+      const [existing] = await queryInterface.sequelize.query(
         `
-        INSERT INTO categories (name)
-        VALUES (:name)
-        ON CONFLICT (name) DO NOTHING
+        SELECT id
+        FROM categories
+        WHERE name = :name
+        LIMIT 1
         `,
         {
           replacements: { name },
         },
       );
-    }
 
+      if (existing.length === 0) {
+        await queryInterface.bulkInsert("categories", [
+          {
+            name,
+          },
+        ]);
+      }
+    }
     const tags = ["new", "flash", "best", "star-seller", "free-shipping"];
 
     for (const name of tags) {
-      await queryInterface.sequelize.query(
+      const [existing] = await queryInterface.sequelize.query(
         `
-        INSERT INTO tags (name)
-        VALUES (:name)
-        ON CONFLICT (name) DO NOTHING
+        SELECT id
+        FROM tags
+        WHERE name = :name
+        LIMIT 1
         `,
         {
           replacements: { name },
         },
       );
+
+      if (existing.length === 0) {
+        await queryInterface.bulkInsert("tags", [
+          {
+            name,
+          },
+        ]);
+      }
     }
   },
 
-  async down(queryInterface, Sequelize) {
-    /**
-     * Add commands to revert seed here.
-     *
-     * Example:
-     * await queryInterface.bulkDelete('People', null, {});
-     */
-    await queryInterface.bulkDelete("tags", {
-      name: ["new", "flash", "best", "star-seller", "free-shipping"],
-    });
-
+  async down(queryInterface) {
     await queryInterface.bulkDelete("categories", {
       name: [
         "Fashion",
@@ -70,6 +68,10 @@ module.exports = {
         "Olahraga",
         "Buku & Alat Tulis",
       ],
+    });
+
+    await queryInterface.bulkDelete("tags", {
+      name: ["new", "flash", "best", "star-seller", "free-shipping"],
     });
   },
 };
