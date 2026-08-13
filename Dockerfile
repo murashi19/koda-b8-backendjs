@@ -1,12 +1,10 @@
 FROM node:alpine
 
-RUN npm install sequelize-cli
-
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci --omit=dev
+RUN npm ci
 
 COPY . .
 
