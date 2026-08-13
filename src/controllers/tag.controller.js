@@ -1,9 +1,10 @@
 import { constants } from "node:http2";
-import TagModel from "../models/tag.models.js";
+import { default as db } from "../models/index.cjs";
 
+const { Tag } = db;
 export async function GetAllTags(req, res) {
   try {
-    const tags = await TagModel.GetAllTags();
+    const tags = await Tag.findAll();
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "Lists Tag",
