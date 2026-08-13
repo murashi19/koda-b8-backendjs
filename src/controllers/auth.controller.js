@@ -2,7 +2,6 @@ import { constants } from "node:http2";
 import bcrypt from "bcrypt";
 import { signToken } from "../lib/jwt.js";
 import { default as db } from "../models/index.cjs";
-import { logSuccess, logError, logInfo } from "../lib/logger.js";
 
 const { Users, UserProfiles, sequelize } = db;
 
@@ -11,8 +10,6 @@ export async function register(req, res) {
   try {
     let full_name, password, role;
     ({ email, password, full_name, role } = req.body);
-
-    logInfo(`Register attempt for ${email}`);
 
     if (!email || !password || !full_name) {
       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
@@ -24,7 +21,6 @@ export async function register(req, res) {
     const existing = await Users.findOne({ where: { email } });
 
     if (existing) {
-      logError(`Register failed for ${email}: email already registered`);
       return res.status(constants.HTTP_STATUS_CONFLICT).json({
         success: false,
         message: "Email is already registered",
@@ -54,7 +50,6 @@ export async function register(req, res) {
       );
 
       await transaction.commit();
-      logSuccess(`User registered: ${newUser.email} (id: ${newUser.id})`);
 
       return res.status(constants.HTTP_STATUS_CREATED).json({
         success: true,
@@ -71,8 +66,6 @@ export async function register(req, res) {
       throw error;
     }
   } catch (err) {
-    logError(`Register failed for ${email}: ${err.message}`);
-
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error",
@@ -85,8 +78,6 @@ export async function login(req, res) {
   try {
     let password;
     ({ email, password } = req.body);
-
-    logInfo(`Login attempt for ${email}`);
 
     if (!email || !password) {
       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
@@ -101,7 +92,6 @@ export async function login(req, res) {
     });
 
     if (!user) {
-      logError(`Login failed for ${email}: user not found`);
       return res.status(constants.HTTP_STATUS_UNAUTHORIZED).json({
         success: false,
         message: "Invalid email or password",
@@ -110,7 +100,6 @@ export async function login(req, res) {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      logError(`Login failed for ${email}: incorrect password`);
       return res.status(constants.HTTP_STATUS_UNAUTHORIZED).json({
         success: false,
         message: "Incorrect password",
@@ -122,8 +111,6 @@ export async function login(req, res) {
       email: user.email,
       role: user.role,
     });
-
-    logSuccess(`User logged in: ${user.email} (id: ${user.id})`);
 
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
@@ -137,8 +124,6 @@ export async function login(req, res) {
       },
     });
   } catch (err) {
-    logError(`Login failed for ${email}: ${err.message}`);
-
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error",
