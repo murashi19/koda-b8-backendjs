@@ -66,6 +66,8 @@ export async function register(req, res) {
       throw error;
     }
   } catch (err) {
+    console.error("LOGIN ERROR:", err);
+
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error",
@@ -124,6 +126,8 @@ export async function login(req, res) {
       },
     });
   } catch (err) {
+    console.error("LOGIN ERROR:", err);
+
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error",
