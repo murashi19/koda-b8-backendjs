@@ -1,11 +1,16 @@
-import WishlistModel from "../models/wishlist.models.js";
+import { default as db } from "../models/index.cjs";
 import { constants } from "node:http2";
+
+const { Wishlist } = db;
 
 export async function GetWishlist(req, res) {
   try {
     const user_id = req.user.id;
 
-    const wishlist = await WishlistModel.GetWishlist(user_id);
+    const wishlist = await Wishlist.findAll({
+      where: { user_id },
+      include: { association: "product" },
+    });
 
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
@@ -20,6 +25,7 @@ export async function GetWishlist(req, res) {
     });
   }
 }
+
 export async function CreateWishlist(req, res) {
   try {
     const user_id = req.user.id;
@@ -32,7 +38,7 @@ export async function CreateWishlist(req, res) {
       });
     }
 
-    const wishlist = await WishlistModel.CreateWishlist(user_id, product_id);
+    const wishlist = await Wishlist.create({ user_id, product_id });
 
     return res.status(constants.HTTP_STATUS_CREATED).json({
       success: true,
@@ -40,7 +46,7 @@ export async function CreateWishlist(req, res) {
       data: wishlist,
     });
   } catch (error) {
-    if (error.code === "DUPLICATE_WISHLIST") {
+    if (error.name === "SequelizeUniqueConstraintError") {
       return res.status(constants.HTTP_STATUS_CONFLICT).json({
         success: false,
         message: "Product already in wishlist",
@@ -66,7 +72,9 @@ export async function DeleteWishlist(req, res) {
       });
     }
 
-    const deleted = await WishlistModel.DeleteWishlist(user_id, product_id);
+    const deleted = await Wishlist.destroy({
+      where: { user_id, product_id },
+    });
 
     if (!deleted) {
       return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
