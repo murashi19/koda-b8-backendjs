@@ -1,6 +1,6 @@
 FROM node:alpine
 
-RUN apk add --no-cache postgresql-client
+RUN npm install sequelize-cli
 
 WORKDIR /app
 
