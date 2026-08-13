@@ -1,6 +1,5 @@
 import { constants } from "node:http2";
 import { default as db } from "../models/index.cjs";
-import { logSuccess, logError, logInfo } from "../lib/logger.js";
 
 const { Addresses, UserProfiles, sequelize } = db;
 
@@ -8,7 +7,6 @@ export async function GetAllAddress(req, res) {
   let userId;
   try {
     userId = req.user.id;
-    logInfo(`Fetching all addresses for user ${userId}`);
 
     const addresses = await Addresses.findAll({
       include: [
@@ -27,15 +25,12 @@ export async function GetAllAddress(req, res) {
       ],
     });
 
-    logSuccess(`Fetched ${addresses.length} address(es) for user ${userId}`);
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "Get address successfully",
       data: addresses,
     });
   } catch (err) {
-    logError(`Failed to fetch addresses for user ${userId}: ${err.message}`);
-
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error",
@@ -49,7 +44,6 @@ export async function GetAddressById(req, res) {
   try {
     ({ id } = req.params);
     userId = req.user.id;
-    logInfo(`Fetching address ${id} for user ${userId}`);
 
     const address = await Addresses.findOne({
       where: {
@@ -68,24 +62,18 @@ export async function GetAddressById(req, res) {
     });
 
     if (!address) {
-      logError(`Address ${id} not found for user ${userId}`);
       return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
         success: false,
         message: "Address not found",
       });
     }
 
-    logSuccess(`Fetched address ${id} for user ${userId}`);
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "Get address successfully",
       data: address,
     });
   } catch (err) {
-    logError(
-      `Failed to fetch address ${id} for user ${userId}: ${err.message}`,
-    );
-
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error",
@@ -109,8 +97,6 @@ export async function CreateAddress(req, res) {
       is_default,
     } = req.body;
 
-    logInfo(`Creating address for user ${userId}`);
-
     if (!label || !province || !city || !address) {
       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
         success: false,
@@ -127,7 +113,6 @@ export async function CreateAddress(req, res) {
 
       if (!profile) {
         await transaction.rollback();
-        logError(`User profile not found for user ${userId}`);
         return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
           success: false,
           message: "User profile not found",
@@ -167,9 +152,6 @@ export async function CreateAddress(req, res) {
       );
 
       await transaction.commit();
-      logSuccess(
-        `Address created for user ${userId} (label: "${newAddress.label}")`,
-      );
       return res.status(constants.HTTP_STATUS_CREATED).json({
         success: true,
         message: "Address created successfully",
@@ -180,8 +162,6 @@ export async function CreateAddress(req, res) {
       throw error;
     }
   } catch (err) {
-    logError(`Failed to create address for user ${userId}: ${err.message}`);
-
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error",
@@ -206,8 +186,6 @@ export async function UpdateAddress(req, res) {
       note,
       is_default,
     } = req.body;
-
-    logInfo(`Updating address ${id} for user ${userId}`);
 
     const data = {
       label,
@@ -248,7 +226,6 @@ export async function UpdateAddress(req, res) {
 
       if (updatedRows === 0) {
         await transaction.rollback();
-        logError(`Address ${id} not found for user ${userId}`);
         return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
           success: false,
           message: "Address not found",
@@ -260,7 +237,6 @@ export async function UpdateAddress(req, res) {
       });
 
       await transaction.commit();
-      logSuccess(`Address ${id} updated for user ${userId}`);
 
       return res.status(constants.HTTP_STATUS_OK).json({
         success: true,
@@ -272,10 +248,6 @@ export async function UpdateAddress(req, res) {
       throw error;
     }
   } catch (err) {
-    logError(
-      `Failed to update address ${id} for user ${userId}: ${err.message}`,
-    );
-
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error",
@@ -289,7 +261,6 @@ export async function DeleteAddress(req, res) {
   try {
     ({ id } = req.params);
     userId = req.user.id;
-    logInfo(`Deleting address ${id} for user ${userId}`);
 
     const deletedCount = await Addresses.destroy({
       where: {
@@ -299,23 +270,17 @@ export async function DeleteAddress(req, res) {
     });
 
     if (!deletedCount) {
-      logError(`Address ${id} not found for user ${userId}`);
       return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
         success: false,
         message: "Address not found",
       });
     }
 
-    logSuccess(`Address ${id} deleted for user ${userId}`);
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "Address deleted successfully",
     });
   } catch (err) {
-    logError(
-      `Failed to delete address ${id} for user ${userId}: ${err.message}`,
-    );
-
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error",
