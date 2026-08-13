@@ -27,7 +27,7 @@ fs.readdirSync(__dirname)
       file.indexOf(".") !== 0 &&
       file !== basename &&
       !file.endsWith(".models.js") &&
-      file.slice(-3) === ".js" &&
+      file.slice(-4) === ".cjs" &&
       file.indexOf(".test.js") === -1
     );
   })
