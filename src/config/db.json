@@ -4,7 +4,8 @@
     "password": "1",
     "database": "weekly",
     "host": "127.0.0.1",
-    "dialect": "postgres"
+    "dialect": "postgres",
+    "logging": false
   },
   "test": {
     "username": "root",
@@ -17,7 +18,8 @@
     "username": "postgres",
     "password": "iMnCvFu/vLsFT6B3aEiazeo+Yeg=",
     "database": "belimudah",
-    "host": "103.127.96.192:9101",
+    "host": "postgres",
+    "port": "9101",
     "dialect": "postgres"
   }
 }
