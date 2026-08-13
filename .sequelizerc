@@ -1,5 +1,5 @@
-import "@babel/register";
-import path from "path";
+require("@babel/register");
+const path = require("path");
 
 export default {
   config: path.resolve("src", "config", "db.json"),
