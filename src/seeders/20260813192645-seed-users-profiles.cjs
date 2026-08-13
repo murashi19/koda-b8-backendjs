@@ -52,7 +52,7 @@ module.exports = {
     for (const profile of profiles) {
       const [existing] = await queryInterface.sequelize.query(
         `
-        SELECT id
+        SELECT user_id
         FROM user_profiles
         WHERE user_id = :user_id
         `,
