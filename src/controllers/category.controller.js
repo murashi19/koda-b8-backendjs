@@ -1,9 +1,10 @@
 import { constants } from "node:http2";
-import CategoryModel from "../models/category.models.js";
+import { default as db } from "../models/index.cjs";
 
+const { Category } = db;
 export async function GetAllCategories(req, res) {
   try {
-    const categories = await CategoryModel.GetAllCategories();
+    const categories = await Category.findAll();
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "Lists Category",
