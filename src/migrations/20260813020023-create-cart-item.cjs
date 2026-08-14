@@ -15,6 +15,14 @@ module.exports = {
       product_id: {
         type: Sequelize.BIGINT,
       },
+      quantity: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      is_selected: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true,
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,
