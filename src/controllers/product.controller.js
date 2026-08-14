@@ -1,6 +1,7 @@
 import { default as db } from "../models/index.cjs";
 import { uploadToCloudinary, deleteFromCloudinary } from "../lib/cloudinary.js";
 import { constants } from "node:http2";
+import buildSearchWhere from "../utils/search.js";
 
 const { Product, ProductImage, ProductDetail, Category, Tag } = db;
 
@@ -23,14 +24,16 @@ function parseTagIds(body) {
 //  GET ALL PRODUCT
 export async function GetAllProduct(req, res) {
   try {
+    const where = buildSearchWhere(req.query.search); // <-- tambahin ini
+
     const products = await Product.findAll({
+      where, // <-- tambahin ini
       include: [
         {
           model: Category,
           as: "category",
           attributes: ["id", "name"],
         },
-
         {
           model: ProductImage,
           as: "images",
@@ -38,13 +41,11 @@ export async function GetAllProduct(req, res) {
           separate: true,
           order: [["sort_order", "ASC"]],
         },
-
         {
           model: ProductDetail,
           as: "detail",
           attributes: ["description", "specifications"],
         },
-
         {
           model: Tag,
           as: "tags",
@@ -54,7 +55,6 @@ export async function GetAllProduct(req, res) {
           },
         },
       ],
-
       order: [["created_at", "ASC"]],
     });
 
@@ -280,6 +280,7 @@ export async function UpdateProduct(req, res) {
       discount_price,
       stock,
       description,
+      specifications,
     } = req.body;
 
     const updateData = {};
@@ -355,12 +356,14 @@ export async function UpdateProduct(req, res) {
         defaults: {
           product_id: id,
           description,
+          specifications,
         },
       });
 
       if (!created) {
         await detail.update({
           description,
+          specifications,
         });
       }
     }

@@ -18,6 +18,18 @@ const SHIPPING_METHODS = {
   "same-day": 0,
 };
 
+const RELATION_SEARCH_COLUMNS = {
+  email: { model: "user" },
+  full_name: { model: "customer" },
+};
+const ORDER_SEARCH_COLUMNS = {
+  order_code: "partial",
+  status: "exact",
+  payment_method: "exact",
+  shipping_method: "exact",
+};
+const SORTABLE_COLUMNS = ["created_at", "total", "status", "order_code"];
+
 const PAYMENT_METHODS = ["bca", "bni", "card", "gopay", "ovo", "dana"];
 
 export async function Checkout(req, res) {
@@ -291,29 +303,105 @@ export async function UpdateOrderStatus(req, res) {
 
 export async function GetAllOrders(req, res) {
   try {
-    const orders = await Order.findAll({
+    // ── Paging ──
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(
+      Math.max(parseInt(req.query.limit, 10) || 10, 1),
+      100,
+    );
+    const offset = (page - 1) * limit;
+
+    // ── Sorting ──
+    const sortBy = SORTABLE_COLUMNS.includes(req.query.sortBy)
+      ? req.query.sortBy
+      : "created_at";
+    const sortOrder =
+      req.query.sortOrder?.toUpperCase() === "ASC" ? "ASC" : "DESC";
+
+    const search = req.query.search || {};
+    const where = {};
+    const userWhere = {};
+    const customerWhere = {};
+
+    for (const [key, rawValue] of Object.entries(search)) {
+      const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+      if (value === undefined || value === null || value === "") continue;
+
+      if (ORDER_SEARCH_COLUMNS[key]) {
+        where[key] =
+          ORDER_SEARCH_COLUMNS[key] === "partial"
+            ? { [Op.like]: `%${value}%` }
+            : value;
+        continue;
+      }
+
+      if (RELATION_SEARCH_COLUMNS[key]) {
+        const target = RELATION_SEARCH_COLUMNS[key].model;
+        const clause = { [Op.like]: `%${value}%` };
+        if (target === "user") userWhere.email = clause;
+        if (target === "customer") customerWhere.full_name = clause;
+        continue;
+      }
+    }
+    if (req.query.status && !where.status) {
+      where.status = req.query.status;
+    }
+    if (req.query.dateFrom || req.query.dateTo) {
+      where.created_at = {};
+      if (req.query.dateFrom)
+        where.created_at[Op.gte] = new Date(req.query.dateFrom);
+      if (req.query.dateTo)
+        where.created_at[Op.lte] = new Date(req.query.dateTo);
+    }
+
+    const hasUserFilter = Object.keys(userWhere).length > 0;
+    const hasCustomerFilter = Object.keys(customerWhere).length > 0;
+
+    const { rows, count } = await Order.findAndCountAll({
+      where,
       include: [
-        { model: Users, as: "user", attributes: ["email"] },
-        { model: UserProfiles, as: "customer", attributes: ["full_name"] },
+        {
+          model: Users,
+          as: "user",
+          attributes: ["email"],
+          where: hasUserFilter ? userWhere : undefined,
+          required: hasUserFilter,
+        },
+        {
+          model: UserProfiles,
+          as: "customer",
+          attributes: ["full_name"],
+          where: hasCustomerFilter ? customerWhere : undefined,
+          required: hasCustomerFilter,
+        },
         { model: OrderItem, as: "items", attributes: ["id"] },
       ],
-      order: [["created_at", "DESC"]],
+      order: [[sortBy, sortOrder]],
+      limit,
+      offset,
+      distinct: true, // wajib karena include OrderItem (hasMany)
     });
 
-    const data = orders.map((o) => {
+    const data = rows.map((o) => {
       const json = o.toJSON();
       json.item_count = json.items.length;
       delete json.items;
       return json;
     });
 
-    return res.json({
+    return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       data,
+      pagination: {
+        currentPage: page,
+        limit,
+        totalItems: count,
+        totalPages: Math.ceil(count / limit),
+      },
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({
+    return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal server error",
     });
