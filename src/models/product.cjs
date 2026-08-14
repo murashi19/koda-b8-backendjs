@@ -29,6 +29,10 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: "tag_id",
         as: "tags",
       });
+      Product.hasMany(models.OrderItem, {
+        foreignKey: "product_id",
+        as: "orderItems",
+      });
     }
   }
   Product.init(

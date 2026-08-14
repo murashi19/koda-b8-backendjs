@@ -26,13 +26,13 @@ module.exports = {
         },
       },
       regular_price: {
-        type: Sequelize.DECIMAL,
+        type: Sequelize.DECIMAL(12, 2),
       },
       discount_price: {
-        type: Sequelize.DECIMAL,
+        type: Sequelize.DECIMAL(12, 2),
       },
       rating: {
-        type: Sequelize.DECIMAL,
+        type: Sequelize.DECIMAL(2, 1),
       },
       review_count: {
         type: Sequelize.INTEGER,

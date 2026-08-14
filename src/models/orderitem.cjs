@@ -22,11 +22,11 @@ module.exports = (sequelize, DataTypes) => {
     {
       order_id: DataTypes.BIGINT,
       product_id: DataTypes.BIGINT,
-      product_name: DataTypes.STRING,
-      product_image: DataTypes.STRING,
-      price: DataTypes.DECIMAL,
+      product_name: DataTypes.STRING(255),
+      product_image: DataTypes.STRING(500),
+      price: DataTypes.DECIMAL(12, 2),
+      subtotal: DataTypes.DECIMAL(14, 2),
       qty: DataTypes.INTEGER,
-      subtotal: DataTypes.DECIMAL,
     },
     {
       sequelize,
