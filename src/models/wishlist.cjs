@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Wishlist",
       tableName: "wishlists",
       createdAt: "created_at",
-      updated_at: false,
+      updatedAt: false,
     },
   );
   return Wishlist;
