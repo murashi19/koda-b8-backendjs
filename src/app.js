@@ -16,6 +16,7 @@ import userRoute from "./routes/userRoute.js";
 import corsMiddleware from "./middleware/cors.js";
 
 const app = express();
+app.set("query parser", "extended");
 
 // const BACKEND_URL = process.env.BACKEND_URL;
 const options = {

@@ -1,7 +1,7 @@
 import { default as db } from "../models/index.cjs";
 import { uploadToCloudinary, deleteFromCloudinary } from "../lib/cloudinary.js";
 import { constants } from "node:http2";
-import buildSearchWhere from "../utils/search.js";
+import { Op, or, where } from "sequelize";
 
 const { Product, ProductImage, ProductDetail, Category, Tag } = db;
 
@@ -21,18 +21,81 @@ function parseTagIds(body) {
     .filter((value) => Number.isInteger(value) && value > 0);
 }
 
+const PRODUCT_SEARCH_COLUMNS = {
+  name: "partial",
+  brand: "partial",
+};
+
+const RELATION_SEARCH_COLUMNS = {
+  category: { model: "category" },
+  tag: { model: "tag" },
+};
+const GLOBAL_KEYWORD_FIELDS = [
+  "name",
+  "brand",
+  "$category.name$",
+  "$tags.name$",
+];
+
 //  GET ALL PRODUCT
 export async function GetAllProduct(req, res) {
   try {
-    const where = buildSearchWhere(req.query.search); // <-- tambahin ini
+    const search = req.query.search || {};
+
+    const where = {};
+    const categoryWhere = {};
+    const tagWhere = {};
+
+    for (const [key, rawValue] of Object.entries(search)) {
+      const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+      if (value === undefined || value === null || value === "") continue;
+      if (key === "name") {
+        const clause = { [Op.iLike]: `%${value}%` };
+        where[Op.or] = GLOBAL_KEYWORD_FIELDS.map((field) => ({
+          [field]: clause,
+        }));
+        continue;
+      }
+
+      // Search Product
+      if (PRODUCT_SEARCH_COLUMNS[key]) {
+        where[key] =
+          PRODUCT_SEARCH_COLUMNS[key] === "partial"
+            ? { [Op.iLike]: `%${value}%` }
+            : value;
+
+        continue;
+      }
+
+      // Search Relation
+      if (RELATION_SEARCH_COLUMNS[key]) {
+        const target = RELATION_SEARCH_COLUMNS[key].model;
+        const clause = { [Op.iLike]: `%${value}%` };
+
+        if (target === "category") {
+          categoryWhere.name = clause;
+        }
+
+        if (target === "tag") {
+          tagWhere.name = clause;
+        }
+
+        continue;
+      }
+    }
+
+    const hasCategoryFilter = Object.keys(categoryWhere).length > 0;
+    const hasTagFilter = Object.keys(tagWhere).length > 0;
 
     const products = await Product.findAll({
-      where, // <-- tambahin ini
+      where,
       include: [
         {
           model: Category,
           as: "category",
           attributes: ["id", "name"],
+          where: hasCategoryFilter ? categoryWhere : undefined,
+          required: hasCategoryFilter,
         },
         {
           model: ProductImage,
@@ -53,8 +116,11 @@ export async function GetAllProduct(req, res) {
           through: {
             attributes: [],
           },
+          where: hasTagFilter ? tagWhere : undefined,
+          required: hasTagFilter,
         },
       ],
+
       order: [["created_at", "ASC"]],
     });
 
