@@ -37,41 +37,50 @@ const GLOBAL_KEYWORD_FIELDS = [
   "$tags.name$",
 ];
 
-//  GET ALL PRODUCT
+// GET ALL PRODUCT
 export async function GetAllProduct(req, res) {
   try {
     const search = req.query.search || {};
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(
+      Math.max(parseInt(req.query.limit, 10) || 10, 1),
+      100,
+    );
 
+    const offset = (page - 1) * limit;
     const where = {};
     const categoryWhere = {};
     const tagWhere = {};
 
     for (const [key, rawValue] of Object.entries(search)) {
       const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
-      if (value === undefined || value === null || value === "") continue;
+      if (value === undefined || value === null || value === "") {
+        continue;
+      }
       if (key === "name") {
-        const clause = { [Op.iLike]: `%${value}%` };
+        const clause = {
+          [Op.iLike]: `%${value}%`,
+        };
         where[Op.or] = GLOBAL_KEYWORD_FIELDS.map((field) => ({
           [field]: clause,
         }));
         continue;
       }
-
-      // Search Product
       if (PRODUCT_SEARCH_COLUMNS[key]) {
         where[key] =
           PRODUCT_SEARCH_COLUMNS[key] === "partial"
-            ? { [Op.iLike]: `%${value}%` }
+            ? {
+                [Op.iLike]: `%${value}%`,
+              }
             : value;
 
         continue;
       }
-
-      // Search Relation
       if (RELATION_SEARCH_COLUMNS[key]) {
         const target = RELATION_SEARCH_COLUMNS[key].model;
-        const clause = { [Op.iLike]: `%${value}%` };
-
+        const clause = {
+          [Op.iLike]: `%${value}%`,
+        };
         if (target === "category") {
           categoryWhere.name = clause;
         }
@@ -86,7 +95,25 @@ export async function GetAllProduct(req, res) {
 
     const hasCategoryFilter = Object.keys(categoryWhere).length > 0;
     const hasTagFilter = Object.keys(tagWhere).length > 0;
-
+    const total = await Product.count({
+      where,
+      include: [
+        {
+          model: Category,
+          as: "category",
+          where: hasCategoryFilter ? categoryWhere : undefined,
+          required: hasCategoryFilter,
+        },
+        {
+          model: Tag,
+          as: "tags",
+          where: hasTagFilter ? tagWhere : undefined,
+          required: hasTagFilter,
+        },
+      ],
+      distinct: true,
+      col: "id",
+    });
     const products = await Product.findAll({
       where,
       include: [
@@ -120,14 +147,23 @@ export async function GetAllProduct(req, res) {
           required: hasTagFilter,
         },
       ],
-
+      limit,
+      offset,
       order: [["created_at", "ASC"]],
     });
 
+    const totalPages = Math.ceil(total / limit);
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "Lists Product",
       data: products,
+      pagination: {
+        page,
+        total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
     });
   } catch (error) {
     console.error("GetAllProduct:", error);
