@@ -166,7 +166,9 @@ export async function DeleteCartItem(req, res) {
     const userId = req.user.id;
     const { id } = req.params;
 
-    const deleted = await CartItem.destroy({ where: { id, user_id: userId } });
+    const deleted = await CartItem.destroy({
+      where: { id, user_id: userId },
+    });
 
     if (!deleted) {
       return res.status(constants.HTTP_STATUS_NOT_FOUND).json({
