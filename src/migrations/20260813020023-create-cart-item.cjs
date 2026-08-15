@@ -11,9 +11,17 @@ module.exports = {
       },
       user_id: {
         type: Sequelize.BIGINT,
+        references: {
+          model: "users",
+          key: "id",
+        },
       },
       product_id: {
         type: Sequelize.BIGINT,
+        references: {
+          model: "products",
+          key: "id",
+        },
       },
       quantity: {
         type: Sequelize.INTEGER,

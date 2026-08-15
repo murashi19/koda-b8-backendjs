@@ -20,8 +20,24 @@ module.exports = (sequelize, DataTypes) => {
   }
   CartItem.init(
     {
-      user_id: DataTypes.BIGINT,
-      product_id: DataTypes.BIGINT,
+      user_id: {
+        type: DataTypes.BIGINT,
+        allowNull: false,
+        primaryKey: true,
+        references: {
+          model: "users",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+      },
+      product_id: {
+        type: DataTypes.BIGINT,
+        allowNull: false,
+        references: {
+          model: "products",
+          key: "id",
+        },
+      },
       quantity: DataTypes.INTEGER,
       is_selected: DataTypes.BOOLEAN,
     },

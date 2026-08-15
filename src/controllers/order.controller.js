@@ -195,10 +195,10 @@ export async function Checkout(req, res) {
         transaction: t,
         lock: t.LOCK.UPDATE,
       });
-      const productMap = new Map(products.map((p) => [p.id, p]));
-
+      const productMap = new Map(products.map((p) => [String(p.id), p]));
       const outOfStock = cartItems.find((ci) => {
-        const product = productMap.get(ci.product_id);
+        const product = productMap.get(String(ci.product_id));
+
         return !product || ci.quantity > product.stock;
       });
       if (outOfStock) {
