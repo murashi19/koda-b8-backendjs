@@ -95,62 +95,76 @@ export async function GetAllProduct(req, res) {
 
     const hasCategoryFilter = Object.keys(categoryWhere).length > 0;
     const hasTagFilter = Object.keys(tagWhere).length > 0;
+
+    const searchIncludes = [
+      {
+        model: Category,
+        as: "category",
+        attributes: [],
+        where: hasCategoryFilter ? categoryWhere : undefined,
+        required: hasCategoryFilter,
+      },
+      {
+        model: Tag,
+        as: "tags",
+        attributes: [],
+        through: { attributes: [] },
+        where: hasTagFilter ? tagWhere : undefined,
+        required: hasTagFilter,
+      },
+    ];
+
     const total = await Product.count({
       where,
-      include: [
-        {
-          model: Category,
-          as: "category",
-          where: hasCategoryFilter ? categoryWhere : undefined,
-          required: hasCategoryFilter,
-        },
-        {
-          model: Tag,
-          as: "tags",
-          where: hasTagFilter ? tagWhere : undefined,
-          required: hasTagFilter,
-        },
-      ],
+      include: searchIncludes,
       distinct: true,
       col: "id",
     });
-    const products = await Product.findAll({
+
+    const matchedRows = await Product.findAll({
+      attributes: ["id", "created_at"],
       where,
-      include: [
-        {
-          model: Category,
-          as: "category",
-          attributes: ["id", "name"],
-          where: hasCategoryFilter ? categoryWhere : undefined,
-          required: hasCategoryFilter,
-        },
-        {
-          model: ProductImage,
-          as: "images",
-          attributes: ["id", "image_url", "sort_order"],
-          separate: true,
-          order: [["sort_order", "ASC"]],
-        },
-        {
-          model: ProductDetail,
-          as: "detail",
-          attributes: ["description", "specifications"],
-        },
-        {
-          model: Tag,
-          as: "tags",
-          attributes: ["id", "name"],
-          through: {
-            attributes: [],
-          },
-          where: hasTagFilter ? tagWhere : undefined,
-          required: hasTagFilter,
-        },
-      ],
+      include: searchIncludes,
+      subQuery: false,
+      distinct: true,
+      order: [["created_at", "ASC"]],
       limit,
       offset,
-      order: [["created_at", "ASC"]],
     });
+    const matchedIds = matchedRows.map((row) => row.id);
+    const products = matchedIds.length
+      ? await Product.findAll({
+          where: { id: matchedIds },
+          include: [
+            {
+              model: Category,
+              as: "category",
+              attributes: ["id", "name"],
+            },
+            {
+              model: ProductImage,
+              as: "images",
+              attributes: ["id", "image_url", "sort_order"],
+              separate: true,
+              order: [["sort_order", "ASC"]],
+            },
+            {
+              model: ProductDetail,
+              as: "detail",
+              attributes: ["description", "specifications"],
+            },
+            {
+              model: Tag,
+              as: "tags",
+              attributes: ["id", "name"],
+              through: {
+                attributes: [],
+              },
+            },
+          ],
+          order: [["created_at", "ASC"]],
+        })
+      : [];
 
     const totalPages = Math.ceil(total / limit);
     return res.status(constants.HTTP_STATUS_OK).json({
