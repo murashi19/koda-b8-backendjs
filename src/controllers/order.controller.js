@@ -1,6 +1,6 @@
 import { constants } from "node:http2";
 import { default as db } from "../models/index.cjs";
-import { Op, or, where } from "sequelize";
+import { Op } from "sequelize";
 
 const {
   Order,
@@ -33,6 +33,49 @@ const SORTABLE_COLUMNS = ["created_at", "total", "status", "order_code"];
 
 const PAYMENT_METHODS = ["bca", "bni", "card", "gopay", "ovo", "dana"];
 
+const ORDER_STATUSES = [
+  "PENDING",
+  "PAID",
+  "PROCESSING",
+  "SHIPPED",
+  "DELIVERED",
+  "CANCELLED",
+];
+
+export async function GetOrderStatusCounts(req, res) {
+  try {
+    const rows = await Order.findAll({
+      attributes: [
+        "status",
+        [sequelize.fn("COUNT", sequelize.col("id")), "count"],
+      ],
+      group: ["status"],
+      raw: true,
+    });
+
+    const counts = {};
+    for (const status of ORDER_STATUSES) counts[status] = 0;
+
+    let all = 0;
+    for (const row of rows) {
+      const total = Number(row.count) || 0;
+      counts[row.status] = total;
+      all += total;
+    }
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      data: { all, ...counts },
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
 export async function GetAllOrders(req, res) {
   try {
     // ── Paging ──
@@ -54,10 +97,16 @@ export async function GetAllOrders(req, res) {
     const where = {};
     const userWhere = {};
     const customerWhere = {};
+    let keyword;
 
     for (const [key, rawValue] of Object.entries(search)) {
       const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
       if (value === undefined || value === null || value === "") continue;
+
+      if (key === "keyword") {
+        keyword = value;
+        continue;
+      }
 
       if (ORDER_SEARCH_COLUMNS[key]) {
         where[key] =
@@ -89,30 +138,109 @@ export async function GetAllOrders(req, res) {
     const hasUserFilter = Object.keys(userWhere).length > 0;
     const hasCustomerFilter = Object.keys(customerWhere).length > 0;
 
-    const { rows, count } = await Order.findAndCountAll({
-      where,
-      include: [
-        {
-          model: Users,
-          as: "user",
-          attributes: ["email"],
-          where: hasUserFilter ? userWhere : undefined,
-          required: hasUserFilter,
-        },
-        {
-          model: UserProfiles,
-          as: "customer",
-          attributes: ["full_name"],
-          where: hasCustomerFilter ? customerWhere : undefined,
-          required: hasCustomerFilter,
-        },
-        { model: OrderItem, as: "items", attributes: ["id"] },
-      ],
-      order: [[sortBy, sortOrder]],
-      limit,
-      offset,
-      distinct: true, // wajib karena include OrderItem (hasMany)
-    });
+    let rows;
+    let count;
+
+    if (keyword) {
+      const keywordWhere = {
+        [Op.or]: [
+          { order_code: { [Op.like]: `%${keyword}%` } },
+          sequelize.where(sequelize.col("customer.full_name"), {
+            [Op.like]: `%${keyword}%`,
+          }),
+          sequelize.where(sequelize.col("user.email"), {
+            [Op.like]: `%${keyword}%`,
+          }),
+        ],
+      };
+
+      const idRows = await Order.findAll({
+        where: { ...where, ...keywordWhere },
+        include: [
+          {
+            model: Users,
+            as: "user",
+            attributes: [],
+            where: hasUserFilter ? userWhere : undefined,
+            required: false,
+          },
+          {
+            model: UserProfiles,
+            as: "customer",
+            attributes: [],
+            where: hasCustomerFilter ? customerWhere : undefined,
+            required: false,
+          },
+        ],
+        attributes: ["id"],
+        order: [[sortBy, sortOrder]],
+        limit,
+        offset,
+        subQuery: false,
+        distinct: true,
+      });
+
+      const matchedIds = idRows.map((r) => r.id);
+
+      count = await Order.count({
+        where: { ...where, ...keywordWhere },
+        include: [
+          { model: Users, as: "user", attributes: [], required: false },
+          {
+            model: UserProfiles,
+            as: "customer",
+            attributes: [],
+            required: false,
+          },
+        ],
+        distinct: true,
+        col: "id",
+        subQuery: false,
+      });
+
+      rows = matchedIds.length
+        ? await Order.findAll({
+            where: { id: matchedIds },
+            include: [
+              { model: Users, as: "user", attributes: ["email"] },
+              {
+                model: UserProfiles,
+                as: "customer",
+                attributes: ["full_name"],
+              },
+              { model: OrderItem, as: "items", attributes: ["id"] },
+            ],
+            order: [[sortBy, sortOrder]],
+          })
+        : [];
+    } else {
+      const result = await Order.findAndCountAll({
+        where,
+        include: [
+          {
+            model: Users,
+            as: "user",
+            attributes: ["email"],
+            where: hasUserFilter ? userWhere : undefined,
+            required: hasUserFilter,
+          },
+          {
+            model: UserProfiles,
+            as: "customer",
+            attributes: ["full_name"],
+            where: hasCustomerFilter ? customerWhere : undefined,
+            required: hasCustomerFilter,
+          },
+          { model: OrderItem, as: "items", attributes: ["id"] },
+        ],
+        order: [[sortBy, sortOrder]],
+        limit,
+        offset,
+        distinct: true, // wajib karena include OrderItem (hasMany)
+      });
+      rows = result.rows;
+      count = result.count;
+    }
 
     const data = rows.map((o) => {
       const json = o.toJSON();

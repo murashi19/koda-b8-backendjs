@@ -3,6 +3,7 @@ import { GetDashboardSummary } from "../controllers/dashboard.controller.js";
 import {
   GetAllOrders,
   GetOrderDetailAdmin,
+  GetOrderStatusCounts,
 } from "../controllers/order.controller.js";
 import authMiddleware from "../middleware/auth.js";
 import requireAdmin from "../middleware/admin.js";
@@ -44,6 +45,29 @@ router.get("/dashboard", authMiddleware, requireAdmin, GetDashboardSummary);
  *         description: Forbidden, admin only
  */
 router.get("/orders", authMiddleware, requireAdmin, GetAllOrders);
+
+/**
+ * @openapi
+ * /admin/orders/status-counts:
+ *   get:
+ *     summary: Get order counts grouped by status, plus total (admin only). Dipakai untuk badge angka di tab filter OrderList.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Counts per status
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden, admin only
+ */
+router.get(
+  "/orders/status-counts",
+  authMiddleware,
+  requireAdmin,
+  GetOrderStatusCounts,
+);
 
 /**
  * @openapi
