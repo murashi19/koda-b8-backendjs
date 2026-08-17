@@ -38,6 +38,9 @@ module.exports = (sequelize, DataTypes) => {
         withPassword: {
           attributes: { include: ["password"] },
         },
+        withResetToken: {
+          attributes: { include: ["password"] },
+        },
       },
     },
   );

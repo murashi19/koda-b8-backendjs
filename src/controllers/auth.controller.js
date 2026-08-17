@@ -138,6 +138,7 @@ export async function login(req, res) {
   }
 }
 
+const resetTokens = new Map();
 export async function forgotPassword(req, res) {
   try {
     const { email } = req.body;
@@ -147,26 +148,21 @@ export async function forgotPassword(req, res) {
         message: "Email wajib diisi",
       });
     }
-
-    const user = await Users.findOne({ where: { email } });
+    const user = await Users.findOne({
+      where: { email },
+    });
+    // Jangan memberitahu apakah email terdaftar
     if (!user) {
       return res.status(constants.HTTP_STATUS_OK).json({
         success: true,
         message: "Jika email terdaftar, tautan reset password akan dikirim.",
       });
     }
-
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(resetToken)
-      .digest("hex");
-
-    await user.update({
-      reset_password_token: hashedToken,
-      reset_password_expires: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+    resetTokens.set(user.email, {
+      token: resetToken,
+      expires: Date.now() + RESET_TOKEN_TTL_MS,
     });
-
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "Jika email terdaftar, tautan reset password akan dikirim.",
@@ -188,55 +184,59 @@ export async function forgotPassword(req, res) {
 export async function resetPassword(req, res) {
   try {
     const { email, token, password } = req.body;
-
     if (!email || !token || !password) {
       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
         success: false,
         message: "Email, token, dan password baru wajib diisi",
       });
     }
-
     if (password.length < 6) {
       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
         success: false,
         message: "Password minimal 6 karakter",
       });
     }
-
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-    const user = await Users.scope("withResetToken").findOne({
+    const user = await Users.findOne({
       where: { email },
     });
-
-    if (
-      !user ||
-      !user.reset_password_token ||
-      user.reset_password_token !== hashedToken
-    ) {
+    if (!user) {
       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
         success: false,
         message: "Token reset tidak valid",
       });
     }
+    // Ambil token yang tersimpan di memory backend
+    const storedReset = resetTokens.get(user.email);
+    if (!storedReset) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "Token reset tidak ditemukan atau sudah digunakan",
+      });
+    }
 
-    if (
-      !user.reset_password_expires ||
-      user.reset_password_expires.getTime() < Date.now()
-    ) {
+    // Cek expired
+    if (storedReset.expires < Date.now()) {
+      resetTokens.delete(user.email);
       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
         success: false,
         message: "Token reset sudah kadaluarsa, silakan minta ulang",
       });
     }
-
+    // Cek token
+    if (storedReset.token !== token) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "Token reset tidak valid",
+      });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    // Update password
     await user.update({
       password: hashedPassword,
-      reset_password_token: null,
-      reset_password_expires: null,
     });
 
+    // Hapus token setelah berhasil digunakan
+    resetTokens.delete(user.email);
     return res.status(constants.HTTP_STATUS_OK).json({
       success: true,
       message: "Password berhasil diubah, silakan login",
