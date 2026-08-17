@@ -1,5 +1,6 @@
 import { constants } from "node:http2";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { signToken } from "../lib/jwt.js";
 import { default as db } from "../models/index.cjs";
 
@@ -127,6 +128,119 @@ export async function login(req, res) {
     });
   } catch (err) {
     console.error("LOGIN ERROR:", err);
+
+    return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function forgotPassword(req, res) {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "Email wajib diisi",
+      });
+    }
+
+    const user = await Users.findOne({ where: { email } });
+    if (!user) {
+      return res.status(constants.HTTP_STATUS_OK).json({
+        success: true,
+        message: "Jika email terdaftar, tautan reset password akan dikirim.",
+      });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    await user.update({
+      reset_password_token: hashedToken,
+      reset_password_expires: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+    });
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "Jika email terdaftar, tautan reset password akan dikirim.",
+      data: {
+        email: user.email,
+        resetToken,
+      },
+    });
+  } catch (err) {
+    console.error("FORGOT PASSWORD ERROR:", err);
+
+    return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function resetPassword(req, res) {
+  try {
+    const { email, token, password } = req.body;
+
+    if (!email || !token || !password) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "Email, token, dan password baru wajib diisi",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "Password minimal 6 karakter",
+      });
+    }
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await Users.scope("withResetToken").findOne({
+      where: { email },
+    });
+
+    if (
+      !user ||
+      !user.reset_password_token ||
+      user.reset_password_token !== hashedToken
+    ) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "Token reset tidak valid",
+      });
+    }
+
+    if (
+      !user.reset_password_expires ||
+      user.reset_password_expires.getTime() < Date.now()
+    ) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json({
+        success: false,
+        message: "Token reset sudah kadaluarsa, silakan minta ulang",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await user.update({
+      password: hashedPassword,
+      reset_password_token: null,
+      reset_password_expires: null,
+    });
+
+    return res.status(constants.HTTP_STATUS_OK).json({
+      success: true,
+      message: "Password berhasil diubah, silakan login",
+    });
+  } catch (err) {
+    console.error("RESET PASSWORD ERROR:", err);
 
     return res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
       success: false,

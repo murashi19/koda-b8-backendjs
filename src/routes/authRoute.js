@@ -1,6 +1,11 @@
 import express from "express";
 
-import { register, login } from "../controllers/auth.controller.js";
+import {
+  register,
+  login,
+  forgotPassword,
+  resetPassword,
+} from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
@@ -87,5 +92,63 @@ router.post("/register", register);
  *        description: Invalid email or password / Incorrect Password
  */
 router.post("/login", login);
+
+/**
+ * @openapi
+ * /auth/forgot-password:
+ *  post:
+ *    summary: Request a password reset token
+ *    tags: [Auth]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            required: [email]
+ *            properties:
+ *              email:
+ *                type: string
+ *                example: "user@example.com"
+ *    responses:
+ *      200:
+ *        description: Reset token created (returned directly in response — project ini belum punya mail service)
+ *      400:
+ *        description: Email wajib diisi
+ *      404:
+ *        description: Email tidak terdaftar
+ */
+router.post("/forgot-password", forgotPassword);
+
+/**
+ * @openapi
+ * /auth/reset-password:
+ *  post:
+ *    summary: Reset password using the token from /auth/forgot-password
+ *    tags: [Auth]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            required: [email, token, password]
+ *            properties:
+ *              email:
+ *                type: string
+ *                example: "user@example.com"
+ *              token:
+ *                type: string
+ *                example: "a1b2c3..."
+ *              password:
+ *                type: string
+ *                example: "newpassword123"
+ *    responses:
+ *      200:
+ *        description: Password berhasil diubah
+ *      400:
+ *        description: Token tidak valid / kadaluarsa / password terlalu pendek
+ */
+router.post("/reset-password", resetPassword);
 
 export default router;
