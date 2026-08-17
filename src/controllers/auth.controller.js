@@ -6,6 +6,8 @@ import { default as db } from "../models/index.cjs";
 
 const { Users, UserProfiles, sequelize } = db;
 
+const RESET_TOKEN_TTL_MS = 15 * 60 * 1000; // 15 menit
+
 export async function register(req, res) {
   let email;
   try {
